@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.LogDao">
+
+    <insert id="addLog">
+        INSERT INTO log(uid, ip, module, method, client, `current_date`, total_time, result, type)
+        VALUES (#{log.uid}, #{log.ip}, #{log.module}, #{log.method}, #{log.client}, #{log.currentDate},
+                #{log.totalTime},
+                #{log.result}, #{log.type})
+    </insert>
+    <delete id="deleteById">
+        DELETE
+        FROM log
+        WHERE id = #{id}
+    </delete>
+    <select id="getLogByType" resultType="top.chao58.blog.entity.po.Log">
+        SELECT *
+        FROM log
+        WHERE type = #{type}
+    </select>
+
+    <sql id="condition">
+        <where>
+            l.type = #{type}
+            <if test="logQo.name !=null and logQo.name != ''">
+                and u.name like "%"#{logQo.name}"%"
+            </if>
+            <if test="logQo.ip !=null and logQo.ip != ''">
+                and l.ip like "%"#{logQo.ip}"%"
+            </if>
+            <if test="logQo.startTime != null and logQo.startTime != ''">
+                and l.`current_date` &gt;= #{logQo.startTime}
+            </if>
+            <if test="logQo.endTime != null and logQo.endTime != ''">
+                and l.`current_date` &lt;= #{logQo.endTime}
+            </if>
+        </where>
+    </sql>
+
+    <select id="getAdminLogReceptionTotal" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM log l
+        LEFT JOIN user u
+        on l.uid = u.id
+        <include refid="condition"/>
+    </select>
+    <select id="getAdminLogReceptionPage" resultType="top.chao58.blog.entity.vo.admin.LogVo">
+        SELECT
+        l.id, u.name, l.ip, l.module, l.method, l.`current_date`, l.client, l.total_time, l.result,l.type
+        FROM log l
+        LEFT JOIN user u
+        on l.uid = u.id
+        <include refid="condition"/>
+        ORDER BY l.`current_date` DESC
+        LIMIT #{page},#{limit}
+    </select>
+</mapper>

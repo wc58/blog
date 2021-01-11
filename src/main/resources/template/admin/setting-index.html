@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/xm-select.js"></script>
+    <script src="../../static/js/page/article-api.js"></script>
+    <script src="../../static/js/jquery.min.js"></script>
+    <script src="../../static/js/page/common.js"></script>
+</head>
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">系统设置</a>
+                <a>
+                    <cite>首页设置</cite>
+                </a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">header：</label>
+                            <div class="layui-input-block">
+                                <input id="header" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">description：</label>
+                            <div class="layui-input-block">
+                                <input id="description" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">toIndexTitle：</label>
+                            <div class="layui-input-block">
+                                <input id="toIndexTitle" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">toIndexUrl：</label>
+                            <div class="layui-input-block">
+                                <input id="toIndexUrl" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">oneBackgroundPictureUrl：</label>
+                            <div class="layui-input-block">
+                                <input id="oneBackgroundPictureUrl" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">twoBackgroundPictureUrl：</label>
+                            <div class="layui-input-block">
+                                <input id="twoBackgroundPictureUrl" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">articleHeader：</label>
+                            <div class="layui-input-block">
+                                <input id="article_header" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">articleDescription：</label>
+                            <div class="layui-input-block">
+                                <input id="article_description" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">articlePcSize：</label>
+                            <div class="layui-input-block">
+                                <input id="article_pcSize" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">articlePhoneSize：</label>
+                            <div class="layui-input-block">
+                                <input id="article_phoneSize" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <hr>
+
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">meHeader：</label>
+                            <div class="layui-input-block">
+                                <input id="me_header" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">meDescription：</label>
+                            <div class="layui-input-block">
+                                <input id="me_description" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">poemHeader：</label>
+                            <div class="layui-input-block">
+                                <input id="poem_header" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">poemDescription：</label>
+                            <div class="layui-input-block">
+                                <input id="poem_description" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">bottomAddress：</label>
+                            <div class="layui-input-block">
+                                <input id="bottom_address" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">bottomQq：</label>
+                            <div class="layui-input-block">
+                                <input id="bottom_qq" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">bottomEmail：</label>
+                            <div class="layui-input-block">
+                                <input id="bottom_email" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button id="commit" class="layui-btn">立即保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../static/js/wangEditor.min.js"></script>
+<script>
+
+
+    layui.use(['form'], function () {
+        let $ = layui.jquery;
+
+        /*数据回显*/
+        $(function () {
+            $.ajax({
+                type: 'get',
+                url: '/admin/properties/getIndexProperties',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    $('#header').val(data.header);
+                    $('#description').val(data.description);
+                    $('#toIndexTitle').val(data.toIndexTitle);
+                    $('#toIndexUrl').val(data.toIndexUrl);
+                    $('#oneBackgroundPictureUrl').val(data.oneBackgroundPictureUrl);
+                    $('#twoBackgroundPictureUrl').val(data.twoBackgroundPictureUrl);
+                    /*-----*/
+                    $('#article_header').val(data.article_header);
+                    $('#article_description').val(data.article_description);
+                    $('#article_pcSize').val(data.article_pcSize);
+                    $('#article_phoneSize').val(data.article_phoneSize);
+                    /*-----*/
+                    $('#me_header').val(data.me_header);
+                    $('#me_description').val(data.me_description);
+                    /*-----*/
+                    $('#poem_header').val(data.poem_header);
+                    $('#poem_description').val(data.poem_description);
+                    /*-----*/
+                    $('#bottom_address').val(data.bottom_address);
+                    $('#bottom_qq').val(data.bottom_qq);
+                    $('#bottom_email').val(data.bottom_email);
+                    /*-----*/
+                }
+            })
+        })
+
+        /*表单提交*/
+        $("#commit").click(function () {
+            let header = $("#header").val();
+            let description = $("#description").val();
+            let toIndexTitle = $("#toIndexTitle").val();
+            let toIndexUrl = $("#toIndexUrl").val();
+            let oneBackgroundPictureUrl = $("#oneBackgroundPictureUrl").val();
+            let twoBackgroundPictureUrl = $("#twoBackgroundPictureUrl").val();
+            /*---*/
+            let article_header = $("#article_header").val();
+            let article_description = $("#article_description").val();
+            let article_pcSize = $("#article_pcSize").val();
+            let article_phoneSize = $("#article_phoneSize").val();
+            /*---*/
+            let me_header = $("#me_header").val();
+            let me_description = $("#me_description").val();
+            /*---*/
+            let poem_header = $("#poem_header").val();
+            let poem_description = $("#poem_description").val();
+            /*---*/
+            let bottom_address = $("#bottom_address").val();
+            let bottom_qq = $("#bottom_qq").val();
+            let bottom_email = $("#bottom_email").val();
+
+            $.ajax({
+                type: 'post',
+                url: '/admin/properties/updateIndexProperties',
+                dataType: 'json',
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify({
+                    "header": header,
+                    "description": description,
+                    "toIndexTitle": toIndexTitle,
+                    "toIndexUrl": toIndexUrl,
+                    "oneBackgroundPictureUrl": oneBackgroundPictureUrl,
+                    "twoBackgroundPictureUrl": twoBackgroundPictureUrl,
+                    "article_header": article_header,
+                    "article_description": article_description,
+                    "article_pcSize": article_pcSize,
+                    "article_phoneSize": article_phoneSize,
+                    "me_header": me_header,
+                    "me_description": me_description,
+                    "poem_header": poem_header,
+                    "poem_description": poem_description,
+                    "bottom_address": bottom_address,
+                    "bottom_qq": bottom_qq,
+                    "bottom_email": bottom_email,
+                }),
+                success: function (data) {
+                    if (data.code === 0) {
+                        layer.msg("添加成功")
+                    } else {
+                        layer.msg("修改成功")
+                    }
+                }
+            })
+        })
+    });
+</script>
+</html>

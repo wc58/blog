@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/page/article-api.js"></script>
+</head>
+
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">文章管理</a>
+                <a>
+                    <cite>文章列表</cite></a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input id="title" type="text" name="username" placeholder="标题" autocomplete="off"
+                                   class="layui-input"></div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input id="startTime" class="layui-input" autocomplete="off" placeholder="开始日" name="start">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <input id="endTime" class="layui-input" autocomplete="off" placeholder="截止日" name="end">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button id="search" class="layui-btn">
+                                <i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-card-body ">
+                    <table class="layui-hide" id="test" lay-filter="demo"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+
+<script type="text/html" id="isTop">
+    <input id="{{d.id}}" type="checkbox" name="top" value="{{d.top}}" lay-skin="switch"
+           lay-text="是|否"
+           lay-filter="isTop"
+           {{ d.top== 0 ?  '':'checked' }}>
+</script>
+
+<script type="text/html" id="isHidden">
+    <input id="{{d.id}}" type="checkbox" name="lock" value="{{d.hidden}}" title="显示" lay-filter="isHidden"
+           {{ d.hidden==0 ? 'checked' : '' }}>
+</script>
+
+<script type="text/html" id="cover">
+    <img src="{{d.cover}}" height="100px"/>
+</script>
+
+<script type="text/html" id="createTime">
+    <span>{{ layui.util.toDateString(d.createTime, "yyyy-MM-dd HH:mm:ss") }}</span>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="del">回收</a>
+</script>
+
+<script>
+
+    /*日期插件*/
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+        laydate.render({
+            elem: '#startTime'
+        });
+        laydate.render({
+            elem: '#endTime'
+        });
+    });
+
+    let articleTable
+    /*=======开始=======按钮的监听===========*/
+    layui.use('form', function () {
+        var form = layui.form;
+        form.on('switch(isTop)', function (obj) {
+            if (obj.elem.checked) {
+                layer.prompt({
+                    formType: 0
+                    , title: '置顶比重值'
+                    , maxlength: 2
+                    , end: function () {
+                        //重新加载数据
+                        articleTable.reload()
+                    }
+                }, function (value, index) {
+                    //进行置顶
+                    setTop(obj.elem.id, value);
+                    layer.close(index);
+                });
+            } else {
+                layer.confirm(
+                    '当置顶比重值为：' + obj.elem.value + '，是否取消置顶？'
+                    , {
+                        icon: 3
+                        , title: '提示'
+                        , end: function () {
+                            //重新加载数据
+                            articleTable.reload()
+                        }
+                    }
+                    , function (index) {
+                        //取消置顶
+                        setTop(obj.elem.id, 0);
+                        layer.close(index);
+                    });
+            }
+        });
+        form.on('checkbox(isHidden)', function (obj) {
+            setHidden(obj.elem.id, obj.elem.checked)
+        });
+    })
+
+    /*=======结束=======按钮的监听===========*/
+    layui.use(['table', 'util'], function () {
+        let table = layui.table;
+        /*指定列的更新*/
+        table.on('edit(demo)', function (obj) {
+            let id = obj.data.id
+            let field = obj.field
+            let value = obj.value
+            setData(id, field, value);
+        });
+
+        /*操作列的监听*/
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.open({
+                    type: 2,
+                    anim: 1,
+                    title: '修改文章',
+                    content: '/admin/article-add.html?id=' + obj.data.id,
+                    area: ['1300px', '650px'],
+                    end: function () {
+                        articleTable.reload()
+                    }
+                });
+            } else if (obj.event === 'del') {
+                layer.confirm('确定将该文章放入回收站?', {icon: 3, title: '警告'}, function (index) {
+                    recycleArticle(data.id)
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'setDes') {
+                layer.prompt({
+                    formType: 2
+                    , title: '【' + data.title + '】的描述'
+                    , value: data.des
+                    , end: function () {
+                        articleTable.reload()
+                    }
+                }, function (value, index) {
+                    layer.close(index);
+                    obj.update({
+                        sign: value
+                    });
+                    setData(data.id, 'des', value);
+                });
+            }
+        });
+
+
+        /*数据渲染*/
+        articleTable = table.render({
+            elem: '#test'
+            , url: '/admin/article/getAdminArticlePage'
+            , page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip']
+                , groups: 5
+                , first: false
+                , last: false
+                , loading: true
+            }
+            , cols: [[
+                {field: 'id', width: 80, title: 'ID', sort: true}
+                , {field: 'title', width: 130, title: '标题', edit: true}
+                , {field: 'des', title: '描述', event: 'setDes'}
+                , {field: 'cover', width: 120, title: '封面', templet: '#cover'}
+                , {field: 'author', width: 80, title: '作者', edit: true}
+                , {field: 'status', width: 80, title: '状态', edit: true}
+                , {field: 'top', width: 85, title: '置顶', sort: true, templet: '#isTop'}
+                , {field: 'hidden', width: 110, title: '隐藏', sort: true, templet: '#isHidden'}
+                , {
+                    field: 'createTime',
+                    width: 160,
+                    title: '创建时间',
+                    sort: true,
+                    templet: "<div>{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+                }
+                , {
+                    field: 'modifyTime',
+                    width: 160,
+                    title: '修改时间',
+                    sort: true,
+                    templet: "<div>{{layui.util.toDateString(d.modifyTime, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+                }
+                , {fixed: 'right', width: 120, title: '操作', align: 'center', toolbar: '#barDemo'}
+            ]]
+        });
+
+        /*条件查询*/
+        $("#search").click(function () {
+            articleTable.reload({
+                url: '/admin/article/getAdminArticlePage'
+                , where: {
+                    title: $("#title").val(),
+                    startTime: $("#startTime").val(),
+                    endTime: $("#endTime").val(),
+                }
+                , page: {
+                    curr: 1
+                }
+            })
+        })
+
+    });
+</script>
+
+</html>

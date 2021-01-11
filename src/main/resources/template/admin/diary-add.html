@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章评论</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/jquery.min.js"></script>
+    <script src="../../static/js/page/common.js"></script>
+</head>
+<body>
+<div class="x-nav">
+           <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">日记管理</a>
+                <a>
+                    <cite>添加日记</cite></a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <!--头-->
+                </div>
+                <div class="layui-card-body ">
+                    <!--体-->
+                    <div id="content">
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button id="commit" type="button" class="layui-btn layui-btn-primary">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../../static/js/wangEditor.min.js"></script>
+</body>
+<script>
+    const E = window.wangEditor
+    const editor = new E('#content')
+    editor.config.uploadImgServer = '/admin/image/uploadDiaryImage'
+    editor.config.uploadImgMaxLength = 5
+    editor.config.showLinkImg = false
+    editor.config.uploadImgTimeout = 300 * 1000
+    editor.config.uploadFileName = 'diary'
+    editor.create()
+
+    let id = -1;
+    $(function () {
+        id = getQueryVariable("id");
+        /*数据回显*/
+        $(function () {
+            if (id === -1) return;
+            $.ajax({
+                type: 'get',
+                url: '/admin/diary/getAdminDiaryById?id=' + id,
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    if (data.code === 0) {
+                        let diaryData = data.data[0];
+                        editor.txt.html(diaryData.content);
+                        form.render();
+                    } else {
+                        layer.msg("数据回显失败")
+                    }
+                }
+            })
+        })
+    })
+
+
+    /*表单提交*/
+    $("#commit").click(function () {
+        let content = editor.txt.html();
+        $.ajax({
+            type: 'post',
+            url: '/admin/diary/addOrUpdateDiary',
+            dataType: 'json',
+            contentType: "application/json;charset=UTF-8",
+            data: JSON.stringify({
+                "id": id,
+                "content": content,
+            }),
+            success: function (data) {
+                if (data.code === 0) {
+                    if (id === -1) {
+                        layer.msg("添加成功")
+                    } else {
+                        layer.msg("修改成功")
+                    }
+                    id = data.id;
+                } else {
+                    if (id === -1) {
+                        layer.msg("添加成功")
+                    } else {
+                        layer.msg("修改成功")
+                    }
+                }
+            }
+        })
+    })
+
+</script>
+</html>

@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.ArticleCoreDao">
+
+
+    <!--==========================================admin==========================================-->
+    <!--分页条件-->
+    <sql id="condition">
+        WHERE o.del = #{recycle}
+        <if test="articleQo.startTime != '' and articleQo.startTime != null">
+            AND o.create_time &gt;= #{articleQo.startTime}
+        </if>
+        <if test="articleQo.endTime != '' and articleQo.endTime != null">
+            AND o.create_time &lt;= #{articleQo.endTime}
+        </if>
+        <if test="articleQo.title != '' and articleQo.title != null">
+            AND c.title LIKE "%"#{articleQo.title}"%"
+        </if>
+    </sql>
+
+    <!--分页数据-->
+    <select id="getAdminArticlePage" resultType="top.chao58.blog.entity.vo.admin.AdminArticleVo">
+        SELECT c.id,
+        c.title,
+        c.des,
+        c.cover,
+        o.author,
+        o.`status`,
+        o.top,
+        o.hidden,
+        o.create_time,
+        o.modify_time,
+        o.delete_time
+        FROM article_core c
+        RIGHT JOIN article_other o ON c.id = o.id
+        <include refid="condition"/>
+        ORDER BY o.top DESC,
+        o.create_time DESC
+        LIMIT #{page}, #{limit};
+    </select>
+    <!--总条数-->
+    <select id="getAdminArticleTotal" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM article_core c
+        RIGHT JOIN article_other o ON c.id = o.id
+        <include refid="condition"/>
+    </select>
+    <!--更新置顶值-->
+    <update id="updateTopById">
+        UPDATE article_other o
+        set o.top = #{topWeight}
+        WHERE o.id = #{id}
+    </update>
+    <!--更新隐藏值-->
+    <update id="updateHiddenById">
+        UPDATE article_other o
+        set o.hidden = #{isHidden}
+        WHERE o.id = #{id}
+    </update>
+
+    <!--更新核心字段-->
+    <update id="updateCoreDataById">
+        UPDATE article_core
+        <set>
+            <if test="articleDto.title!=null and articleDto.title != ''">
+                title = #{articleDto.title},
+            </if>
+            <if test="articleDto.des!=null and articleDto.des != ''">
+                des = #{articleDto.des},
+            </if>
+        </set>
+        WHERE id = #{articleDto.id};
+    </update>
+    <!--更新其他字段-->
+    <update id="updateOtherDataById">
+        UPDATE article_other
+        <set>
+            modify_time = #{articleDto.modifyTime},
+            <if test="articleDto.author!=null and articleDto.author != ''">
+                author = #{articleDto.author},
+            </if>
+            <if test="articleDto.status!=null and articleDto.status != ''">
+                `status` = #{articleDto.status},
+            </if>
+        </set>
+        WHERE id = #{articleDto.id};
+    </update>
+    <!--将文章放入回收站-->
+    <update id="recycleArticleById">
+        UPDATE article_other
+        set del         = 1,
+            top         = 0,
+            hidden      = 1,
+            delete_time = #{deleteTime}
+        where id = #{id}
+    </update>
+    <!--从回收站还原-->
+    <update id="restoreArticleById">
+        UPDATE article_other
+        set del = 0
+        where id = #{id}
+    </update>
+    <!--真实删除文章信息-->
+    <delete id="deleteCoreArticleById">
+        DELETE
+        FROM article_core
+        WHERE id = #{id}
+    </delete>
+    <delete id="deleteOtherArticleById">
+        DELETE
+        FROM article_other
+        WHERE id = #{id}
+          AND del = 1
+    </delete>
+
+
+    <!--插入数据库-->
+    <insert id="addCore" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO article_core (title, cover, des, content, content_img)
+        VALUES (#{core.title}, #{core.cover}, #{core.des}, #{core.content}, #{core.contentImg});
+    </insert>
+
+    <update id="updateCore">
+        UPDATE article_core
+        SET title       = #{core.title},
+            cover       = #{core.cover},
+            des         = #{core.des},
+            content     = #{core.content},
+            content_img = #{core.contentImg}
+        WHERE id = #{core.id}
+    </update>
+
+    <!--设置标签-->
+    <insert id="addLabel">
+        INSERT INTO article_label (article_id, label_id)
+        VALUES (#{articleId}, #{labelId});
+    </insert>
+
+    <delete id="deleteLabel">
+        DELETE
+        FROM article_label
+        where article_id = #{id}
+    </delete>
+
+    <!--设置其他信息-->
+    <insert id="addOther">
+        INSERT INTO article_other(id, author, `status`, flow, `login`, top, hidden, del, create_time, modify_time)
+        VALUES (#{other.id}, #{other.author}, #{other.status}, #{other.flow}, #{other.login}, #{other.top},
+                #{other.hidden},
+                #{other.del}, #{other.createTime}, #{other.modifyTime})
+    </insert>
+
+    <update id="updateOther">
+        UPDATE article_other
+        SET author     =#{other.author},
+            `status`=#{other.status},
+            `login`= #{other.login},
+            top= #{other.top},
+            hidden= #{other.hidden},
+            modify_time= #{other.modifyTime}
+        WHERE id = #{other.id}
+    </update>
+
+    <delete id="deleteLabelArticleById">
+        DELETE
+        FROM article_label
+        WHERE article_id = #{id}
+    </delete>
+
+    <!--==========================================admin==========================================-->
+
+
+    <!--插入评论-->
+    <insert id="insertComment">
+        INSERT INTO `article_comment` (pid, uid, article_id, content, create_time)
+        VALUES (#{pid}, #{uid}, #{articleId}, #{content}, #{createTime})
+    </insert>
+
+
+    <!--流量加一-->
+    <update id="increaseFlow">
+        UPDATE article_other
+        SET flow = flow + 1
+        WHERE id = #{id}
+    </update>
+
+
+    <!--前台的文章信息-->
+    <select id="queryArticleList" resultType="top.chao58.blog.entity.vo.ArticleListVo">
+        SELECT c.id,
+               c.title,
+               c.des,
+               c.cover,
+               o.`status`,
+               o.create_time,
+               o.flow,
+               o.top
+        FROM article_core c
+                 RIGHT JOIN article_other o ON c.id = o.id
+        where o.hidden = 0
+        ORDER BY o.top DESC,
+                 o.create_time DESC
+        limit #{currentPage},#{showSize};
+    </select>
+
+    <select id="queryArticleListByCondition" resultType="top.chao58.blog.entity.vo.ArticleListVo">
+        SELECT c.id,
+        c.title,
+        c.des,
+        c.cover,
+        o.`status`,
+        o.create_time,
+        o.flow,
+        o.top
+        FROM article_core c
+        RIGHT JOIN article_other o ON c.id = o.id
+        where o.hidden = 0
+        <if test="articleIds != null and articleIds.size() != 0">
+            and o.id in
+            <foreach collection="articleIds" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="searchTxt != null and searchTxt!= ''">
+            and c.title like "%"#{searchTxt}"%"
+        </if>
+        ORDER BY o.top DESC,
+        o.create_time DESC
+        limit #{currentPage},#{showSize};
+    </select>
+
+    <select id="queryTotalByCondition" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM article_core c
+        RIGHT JOIN article_other o ON c.id = o.id
+        WHERE hidden = 0
+        <if test="articleIds != null and articleIds.size() != 0">
+            and o.id in (#{articleIds})
+        </if>
+        <if test="searchTxt != null and searchTxt!= ''">
+            and c.title like "%"#{searchTxt}"%"
+        </if>
+    </select>
+
+
+    <!--热门文章信息-->
+    <select id="queryHotArticle" resultType="top.chao58.blog.entity.vo.HotArticleVo">
+        SELECT c.id,
+               title,
+               des,
+               cover,
+               create_time
+        FROM article_core c
+                 RIGHT JOIN article_other o ON c.id = o.id
+        WHERE o.hidden = 0
+        ORDER BY o.flow DESC
+        LIMIT 0,#{size}
+    </select>
+
+    <!--置顶文章信息-->
+    <select id="queryTopArticle" resultType="top.chao58.blog.entity.vo.TopArticleVo">
+        SELECT c.id,
+               title
+        FROM article_core c
+                 RIGHT JOIN article_other o ON c.id = o.id
+        WHERE o.top != 0
+          and o.hidden = 0
+        ORDER BY o.top
+    </select>
+
+    <!--查看文章内部信息-->
+    <select id="queryArticleById" resultType="top.chao58.blog.entity.vo.ReadArticleVo">
+        SELECT c.id,
+               c.title,
+               c.content,
+               o.author,
+               o.flow,
+               o.login,
+               o.create_time,
+               o.modify_time
+        FROM article_core c
+                 LEFT JOIN article_other o ON c.id = o.id
+        WHERE o.hidden = 0
+          and o.id = #{id}
+    </select>
+
+
+    <!--查询总条数-->
+    <select id="queryTotal" resultType="java.lang.Integer">
+        SELECT count(1)
+        from article_other
+        WHERE hidden = 0
+    </select>
+
+    <!--根据id查询文章信息-->
+    <select id="getAdminArticleById" resultType="top.chao58.blog.entity.vo.admin.AdminArticleVo">
+        SELECT c.id,
+               c.title,
+               c.des,
+               c.content,
+               c.cover,
+               o.`status`,
+               o.`login`,
+               o.top,
+               o.hidden,
+               o.create_time,
+               o.modify_time
+        FROM article_core c
+                 RIGHT JOIN article_other o ON c.id = o.id
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="getArticleLoginStatusById" resultType="java.lang.Integer">
+        SELECT login
+        from article_other
+        where id = #{id}
+    </select>
+
+    <select id="getArticleSize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM article_core
+    </select>
+    <select id="getFlowSize" resultType="java.lang.Integer">
+        SELECT sum(flow)
+        FROM article_other
+    </select>
+    <select id="getArticleTopSize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM article_other
+        WHERE top != 0
+    </select>
+
+
+</mapper>

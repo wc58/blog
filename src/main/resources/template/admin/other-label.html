@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/page/label-api.js"></script>
+</head>
+
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">其他管理</a>
+                <a>
+                    <cite>标签列表</cite></a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-inline layui-show-xs-block">
+                        <button id="addLabel" class="layui-btn layui-btn-primary"><i class="iconfont">&#xe6b9;</i>
+                        </button>
+                    </div>
+                </div>
+                <div class="layui-card-body ">
+                    <table class="layui-hide" id="test" lay-filter="demo"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="isHidden">
+    <input id="{{d.id}}" type="checkbox" name="lock" value="{{d.hidden}}" title="显示" lay-filter="isHidden"
+           {{ d.hidden==0 ? 'checked' : '' }}>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    let labelTable;
+
+    layui.use(['jquery', 'layer'], function () {
+        let $ = layui.jquery;
+        let layer = layui.layer;
+
+        $("#addLabel").click(function () {
+            layer.prompt({
+                formType: 0
+                , title: '请输入标签'
+                , value: ''
+                , end: function () {
+                    labelTable.reload();
+                }
+            }, function (value, index) {
+                layer.close(index);
+                /*插入数据库*/
+                addLabel(value);
+            });
+        })
+    })
+
+    /*标签隐藏*/
+    layui.use('form', function () {
+        var form = layui.form;
+        form.on('checkbox(isHidden)', function (obj) {
+            setHidden(obj.elem.id, obj.elem.checked);
+        });
+    })
+
+    layui.use('table', function () {
+        let table = layui.table;
+
+        /*更新列信息*/
+        table.on('edit(demo)', function (obj) {
+            setData(obj.data.id, obj.field, obj.value);
+        });
+
+        /*删除标签*/
+        table.on('tool(demo)', function (obj) {
+            if (obj.event === 'del') {
+                layer.confirm('一旦删除彻底消失，是否继续？', {
+                    icon: 2,
+                    title: '严重',
+                    end: function () {
+                        labelTable.reload();
+                    }
+                }, function (index) {
+                    deleteLabel(obj.data.id);
+                    layer.close(index);
+                });
+            }
+        });
+
+        /*渲染标签*/
+        labelTable = table.render({
+            elem: '#test'
+            , url: '/admin/label/getAdminLabelPage'
+            , page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip']
+                , groups: 5
+                , first: false
+                , last: false
+            }
+            , cols: [[
+                {field: 'id', width: 80, title: 'ID', sort: true}
+                , {field: 'name', width: 661, title: '标签名称', edit: true}
+                , {field: 'sort', width: 150, title: '排序', sort: true, edit: true}
+                , {field: 'articleSize', width: 150, title: '文章数量'}
+                , {field: 'hidden', width: 110, title: '隐藏', sort: true, templet: '#isHidden'}
+                , {fixed: 'right', width: 80, title: '操作', align: 'center', toolbar: '#barDemo'}
+            ]]
+        });
+
+    });
+</script>
+
+</html>

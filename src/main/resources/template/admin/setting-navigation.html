@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/page/navigation-api.js"></script>
+</head>
+
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">系统设置</a>
+                <a>
+                    <cite>导航设置</cite></a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <button id="addNavigation" class="layui-btn layui-btn-primary"><i
+                                    class="iconfont">&#xe6b9;</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-card-body ">
+                    <table class="layui-hide" id="test" lay-filter="demo"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form class="layui-form" id="popForm" style="display:none;margin-top: 10px">
+    <div class="layui-form-item">
+        <label class="layui-form-label">标题：</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" required lay-verify="required" autocomplete="off"
+                   class="layui-input" id="title" style="width:200px">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">链接：</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" required lay-verify="required" autocomplete="off"
+                   class="layui-input" id="url" style="width:200px">
+        </div>
+    </div>
+</form>
+</body>
+
+<script type="text/html" id="isLeft">
+    <input id="{{d.id}}" type="checkbox" lay-skin="switch" name="aaa" value="{{d.left}}" lay-text="是|否"
+           lay-filter="isLeft"
+           {{ d.left== 0 ?  '':'checked' }}>
+</script>
+<script type="text/html" id="isBottom">
+    <input id="{{d.id}}" type="checkbox" lay-skin="switch" name="bbb" value="{{d.bottom}}" lay-text="是|否"
+           lay-filter="isBottom"
+           {{ d.bottom== 0 ?  '':'checked' }}>
+</script>
+<script type="text/html" id="isHidden">
+    <input id="{{d.id}}" type="checkbox" name="lock" value="{{d.hidden}}" title="显示" lay-filter="isHidden"
+           {{ d.hidden==0 ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    let navigationTable;
+    /*=======开始=======按钮的监听===========*/
+    layui.use('form', function () {
+        var form = layui.form;
+        form.on('switch(isLeft)', function (obj) {
+            setLeft(obj.elem.id, obj.elem.checked)
+        });
+        form.on('switch(isBottom)', function (obj) {
+            setBottom(obj.elem.id, obj.elem.checked)
+        });
+        form.on('checkbox(isHidden)', function (obj) {
+            setHidden(obj.elem.id, obj.elem.checked)
+        });
+    })
+
+    /*=======结束=======按钮的监听===========*/
+    layui.use(['table', 'util'], function () {
+        let table = layui.table;
+        let $ = layui.jquery;
+        /*指定列的更新*/
+        table.on('edit(demo)', function (obj) {
+            let id = obj.data.id
+            let field = obj.field
+            let value = obj.value
+            setData(id, field, value);
+        });
+
+        /*操作列的监听*/
+        table.on('tool(demo)', function (obj) {
+            if (obj.event === 'del') {
+                layer.confirm('一旦删除彻底消失，是否继续？', {
+                    icon: 2,
+                    title: '严重',
+                    end: function () {
+                        navigationTable.reload();
+                    }
+                }, function (index) {
+                    deleteNavigation(obj.data.id);
+                    layer.close(index);
+                });
+            }
+        });
+
+        /*添加导航*/
+        $("#addNavigation").click(function () {
+            layer.open({
+                type: 1,
+                area: ['350px', '220px'],
+                title: '添加导航'
+                , content: $("#popForm"),
+                shade: 0,
+                end: function () {
+                    navigationTable.reload();
+                },
+                btn: ['提交', '取消']
+                , btn1: function (index) {
+                    let title = $("#title").val();
+                    let url = $("#url").val();
+                    if (title === '' || url === '') {
+                        layer.msg("上述内容不能为空！");
+                        return;
+                    }
+                    addNavigation(title, url);
+                    layer.close(index);
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        })
+
+        /*数据渲染*/
+        navigationTable = table.render({
+            elem: '#test'
+            , url: '/admin/navigation/getAll'
+            , page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip']
+                , groups: 5
+                , first: false
+                , last: false
+                , loading: true
+            }
+            , cols: [[
+                {field: 'id', width: 80, title: 'ID', sort: true}
+                , {field: 'title', width: 130, title: '标题', edit: true}
+                , {field: 'url', title: '链接', edit: true}
+                , {field: 'left', width: 90, title: '右边栏', sort: true, templet: '#isLeft'}
+                , {field: 'bottom', width: 85, title: '底部', sort: true, templet: '#isBottom'}
+                , {field: 'hidden', width: 110, title: '隐藏', sort: true, templet: '#isHidden'}
+                , {fixed: 'right', width: 80, title: '操作', align: 'center', toolbar: '#barDemo'}
+            ]]
+        });
+
+    })
+    ;
+</script>
+
+</html>

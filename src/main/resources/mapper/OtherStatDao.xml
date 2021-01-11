@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.OtherStatDao">
+
+    <resultMap type="top.chao58.blog.entity.po.OtherStat" id="OtherStatMap">
+        <result property="id" column="id" jdbcType="OTHER"/>
+        <result property="comment" column="comment" jdbcType="VARCHAR"/>
+        <result property="leave" column="leave" jdbcType="VARCHAR"/>
+        <result property="user" column="user" jdbcType="VARCHAR"/>
+        <result property="article" column="article" jdbcType="VARCHAR"/>
+        <result property="link" column="link" jdbcType="VARCHAR"/>
+        <result property="day" column="day" jdbcType="OTHER"/>
+    </resultMap>
+
+</mapper>

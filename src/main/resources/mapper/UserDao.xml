@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.UserDao">
+
+    <resultMap type="top.chao58.blog.entity.po.User" id="UserMap">
+        <result property="id" column="id" jdbcType="OTHER"/>
+        <result property="tid" column="tid" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <insert id="insertUser">
+        INSERT INTO `user` (`name`, icon, tid, create_time, modify_time)
+        VALUES (#{name}, #{icon}, #{tid}, #{createTime}, #{modifyTime})
+    </insert>
+    <update id="updateUser">
+        UPDATE `user`
+        SET `name`      = #{name},
+            icon        = #{icon},
+            modify_time = #{modifyTime}
+        WHERE tid = #{tid}
+    </update>
+    <select id="queryLatelyUser" resultType="top.chao58.blog.entity.vo.UserVo">
+        SELECT `name`,
+               icon
+        FROM `user`
+        ORDER BY modify_time desc
+        limit 0,#{visitorSize}
+    </select>
+    <select id="queryByThirdId" resultType="top.chao58.blog.entity.vo.UserVo">
+        SELECT id,
+               'name',
+               icon
+        FROM `user`
+        WHERE tid = #{thirdId}
+    </select>
+    <!--=============start=====================admin======================================================================================-->
+    <sql id="condition">
+        <if test="name != null and name != ''">
+            WHERE name LIKE "%"#{name}"%"
+        </if>
+    </sql>
+    <select id="getAdminUserTotal" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM user
+        <include refid="condition"/>
+    </select>
+    <select id="getAdminUserPage" resultType="top.chao58.blog.entity.po.User">
+        SELECT *
+        FROM user
+        <include refid="condition"/>
+        LIMIT #{page},#{limit}
+    </select>
+    <select id="getUserSize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM user
+    </select>
+    <!--=============end=====================admin======================================================================================-->
+</mapper>

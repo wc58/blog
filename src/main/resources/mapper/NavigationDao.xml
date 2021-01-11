@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.NavigationDao">
+
+    <resultMap type="top.chao58.blog.entity.po.Navigation" id="NavigationMap">
+        <result property="id" column="id" jdbcType="OTHER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="left" column="left" jdbcType="OTHER"/>
+        <result property="bottom" column="bottom" jdbcType="OTHER"/>
+        <result property="hidden" column="hidden" jdbcType="OTHER"/>
+    </resultMap>
+
+
+    <select id="queryAllLeft" resultMap="NavigationMap">
+        select title, url
+        from blog.navigation
+        where `left` = 1
+          and hidden = 0
+    </select>
+    <select id="queryAllBottom" resultMap="NavigationMap">
+        select title, url
+        from blog.navigation
+        where bottom = 1
+          and hidden = 0
+    </select>
+    <select id="queryAllTop" resultMap="NavigationMap">
+        select title, url
+        from blog.navigation
+        where hidden = 0
+    </select>
+
+
+    <select id="getAll" resultType="top.chao58.blog.entity.po.Navigation">
+        SELECT *
+        FROM navigation;
+    </select>
+
+    <delete id="deleteById">
+        DELETE
+        FROM navigation
+        WHERE id = #{id};
+    </delete>
+
+    <update id="updateLeftById">
+        UPDATE navigation
+        SET `left` = #{leftValue}
+        WHERE id = #{id};
+    </update>
+
+    <update id="updateBottomById">
+        UPDATE navigation
+        SET `bottom` = #{bottomValue}
+        WHERE id = #{id};
+    </update>
+
+    <update id="updateHiddenById">
+        UPDATE navigation
+        SET `hidden` = #{hiddenValue}
+        WHERE id = #{id};
+    </update>
+
+    <update id="updateDataById">
+        UPDATE navigation
+        <set>
+            <if test="navigation.title != null and navigation.title != ''">`title` = #{navigation.title},</if>
+            <if test="navigation.url != null and navigation.url != ''">`url` = #{navigation.url},</if>
+        </set>
+        WHERE id = #{navigation.id};
+    </update>
+
+    <insert id="addNavigation">
+        INSERT INTO navigation(title, url, `left`, bottom, hidden)
+        VALUES (#{navigation.title}, #{navigation.url}, #{navigation.left}, #{navigation.bottom}, #{navigation.hidden});
+    </insert>
+
+</mapper>

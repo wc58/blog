@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/jquery.min.js"></script>
+</head>
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">系统设置</a>
+                <a>
+                    <cite>邮箱设置</cite>
+                </a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">sendEmailAccount：</label>
+                            <div class="layui-input-block">
+                                <input id="sendEmailAccount" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">sendEmailPassword：</label>
+                            <div class="layui-input-block">
+                                <input id="sendEmailPassword" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">sendEmailSMTPHost：</label>
+                            <div class="layui-input-block">
+                                <input id="sendEmailSMTPHost" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button id="commit" class="layui-btn">立即保存</button>
+                                <button id="testMail" class="layui-btn layui-btn-primary">邮箱测试</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form class="layui-form" id="popForm" style="display:none;margin-top: 10px">
+    <div class="layui-form-item">
+        <label class="layui-form-label">接收邮箱：</label>
+        <div class="layui-input-block">
+            <input type="text" name="mail" required autocomplete="off" value="2258354832@qq.com"
+                   class="layui-input" id="mail" style="width:200px">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">标题：</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" required autocomplete="off"
+                   class="layui-input" id="title" style="width:200px">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">主题：</label>
+        <div class="layui-input-block">
+            <input type="text" name="subject" required autocomplete="off"
+                   class="layui-input" id="subject" style="width:200px">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">内容：</label>
+        <div class="layui-input-block">
+            <textarea id="content" name="content" class="layui-textarea"
+                      style="width:200px"></textarea>
+        </div>
+    </div>
+</form>
+</body>
+<script>
+
+    layui.use(['jquery', 'layer'], function () {
+        let $ = layui.jquery;
+        let layer = layui.layer;
+
+        $("#testMail").click(function () {
+            layer.open({
+                type: 1,
+                area: ['350px', '400px'],
+                title: '测试邮箱'
+                , content: $("#popForm"),
+                shade: 0,
+                end: function () {
+                    linkTable.reload();
+                },
+                btn: ['提交', '取消']
+                , btn1: function (index) {
+                    let mail = $("#mail").val();
+                    let title = $("#title").val();
+                    let subject = $("#subject").val();
+                    let content = $("#content").val();
+                    if (mail === '' || title === '' || subject === '' || content === '') {
+                        layer.msg("上述内容不能为空！");
+                        return;
+                    }
+                    $.ajax({
+                        type: 'get',
+                        url: '/admin/properties/testMail?receiveMailAccount=' + mail + '&title=' + title + "&subject=" + subject + "&content=" + content,
+                        dataType: 'json',
+                        sync: false,
+                        success: function (data) {
+                            if (data.code === 0) {
+                                layer.msg("发送成功")
+                                layer.close(index);
+                            } else {
+                                layer.msg("发送失败")
+                            }
+                        }
+                    })
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        })
+    })
+
+
+    layui.use(['form'], function () {
+        let $ = layui.jquery;
+
+        /*数据回显*/
+        $(function () {
+            $.ajax({
+                type: 'get',
+                url: '/admin/properties/getMailProperties',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    $('#sendEmailAccount').val(data.sendEmailAccount);
+                    $('#sendEmailPassword').val(data.sendEmailPassword);
+                    $('#sendEmailSMTPHost').val(data.sendEmailSMTPHost);
+                }
+            })
+        })
+
+        /*表单提交*/
+        $("#commit").click(function () {
+            let sendEmailAccount = $("#sendEmailAccount").val();
+            let sendEmailPassword = $("#sendEmailPassword").val();
+            let sendEmailSMTPHost = $("#sendEmailSMTPHost").val();
+            $.ajax({
+                type: 'post',
+                url: '/admin/properties/updateMailProperties',
+                dataType: 'json',
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify({
+                    "sendEmailAccount": sendEmailAccount,
+                    "sendEmailPassword": sendEmailPassword,
+                    "sendEmailSMTPHost": sendEmailSMTPHost,
+                }),
+                success: function (data) {
+                    if (data.code === 0) {
+                        layer.msg("添加成功")
+                    } else {
+                        layer.msg("修改成功")
+                    }
+                }
+            })
+        })
+    });
+</script>
+</html>

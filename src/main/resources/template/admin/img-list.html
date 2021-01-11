@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/page/article-api.js"></script>
+    <script src="../../static/js/page/diary-api.js"></script>
+</head>
+<style>
+    .picture {
+        width: 200px;
+        height: 200px;
+        margin: 20px
+    }
+</style>
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a>
+                    <cite>图片列表</cite></a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-body ">
+                <div class="layui-card-body ">
+                    <div class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <select name="city" lay-filter="filter">
+                                <option value="cover/">封面</option>
+                                <option value="article/">文章</option>
+                                <option value="diary/">日记</option>
+                            </select>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button id="clearImage" class="layui-btn layui-btn-primary">
+                                清空无用图片
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div style="align-content: center">
+                    <div id="layer-photos">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+
+<script>
+    /*阻止浏览器操作*/
+    window.document.oncontextmenu = function () {
+        return false;
+    }
+
+
+    let type = 'cover/';
+
+    /*删除图片*/
+    function deletePicture(ossPath) {
+        layer.confirm('确定删除该图片?', {icon: 3, title: '警告'}, function (index) {
+            let code = doDeleteImage(ossPath, false);
+            //强制删除
+            if (code === 1) {
+                layer.confirm('该图片正在使用，确定强制删除改图？', {
+                    icon: 2,
+                    title: '严重',
+                    anim: 6
+                }, function (index) {
+                    doDeleteImage(ossPath, true);
+                    //刷新图片
+                    $("#layer-photos").empty();
+                    getImages();
+                    layer.close(index);
+                });
+            } else {
+                //刷新图片
+                $("#layer-photos").empty();
+                getImages();
+            }
+            layer.close(index);
+        });
+        return false;
+    }
+
+    /*根据类型删除图片*/
+    function doDeleteImage(ossPath, force) {
+        if (type === "cover/") {
+            return deleteCoverImage(ossPath, force);
+        } else if (type === "article/") {
+            return deleteArticleImage(ossPath, force);
+        } else if (type === "diary/") {
+            return deleteDiaryImage(ossPath, force);
+        }
+    }
+
+
+    /*获取图片*/
+    function getImages() {
+        layui.use(['flow', 'layer'], function () {
+            let flow = layui.flow;
+            let layer = layui.layer;
+            let $ = layui.jquery;
+            flow.load({
+                elem: '#layer-photos',
+                isAuto: false,
+                mb: 1,
+                done: function (page, next) {
+                    $.ajax({
+                        type: 'post',
+                        url: '/admin/image/getPictureList?currentPage=' + page + "&type=" + type,
+                        async: false,
+                        success: function (data) {
+                            next(data.images, page < data.pages);
+                        },
+                        dataType: 'json'
+                    })
+
+                }
+            });
+            layer.photos({
+                photos: '#layer-photos'
+                , anim: 5
+            });
+        })
+    }
+
+    layui.use(['flow', 'layer', 'form'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        $("#clearImage").click(function () {
+            $.ajax({
+                type: 'get',
+                url: '/admin/image/deleteImages',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    if (data.code === 0) {
+                        let cover = data.data[0];
+                        let article = data.data[1];
+                        let diary = data.data[2]
+                        layer.msg("删除成功：封面：" + cover + "，文章：" + article + "，日记：" + diary);
+                    } else {
+                        layer.msg("删除失败")
+                    }
+                }
+            })
+        })
+
+        getImages();
+
+
+        form.on('select(filter)', function (data) {
+            type = data.value;
+            $("#layer-photos").empty();
+            getImages();
+        });
+
+    })
+
+
+</script>
+
+</html>

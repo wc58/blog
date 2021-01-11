@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.LeaveDao">
+
+    <insert id="insertLeave">
+        INSERT INTO `leave` (pid, uid, content, create_time)
+        VALUES (#{pid}, #{uid}, #{content}, #{createTime})
+    </insert>
+
+
+    <select id="queryLeave" resultType="top.chao58.blog.entity.vo.LeaveVo">
+        SELECT l.id,
+        u.tid,
+        u.`name`,
+        u.icon,
+        l.content,
+        l.create_time
+        FROM `leave` l
+        LEFT JOIN `user` u ON l.uid = u.id
+        WHERE l.pid = #{pid}
+        ORDER BY l.create_time
+        <choose>
+            <when test="pid == 0">
+                DESC;
+            </when>
+            <otherwise>
+                ASC;
+            </otherwise>
+        </choose>
+    </select>
+    <!--=============start=====================admin======================================================================================-->
+    <sql id="condition">
+        <where>
+            <if test="commentQo.name != null and commentQo.name != ''">
+                and u.`name` like "%"#{commentQo.name}"%"
+            </if>
+            <if test="commentQo.content != null and commentQo.content != ''">
+                and l.content like "%"#{commentQo.content}"%"
+            </if>
+            <if test="commentQo.startTime != null and commentQo.startTime != ''">
+                and l.create_time &gt;= #{commentQo.startTime}
+            </if>
+            <if test="commentQo.endTime != null and commentQo.endTime != ''">
+                and l.create_time &lt;= #{commentQo.endTime}
+            </if>
+        </where>
+    </sql>
+    <select id="getAdminLeaveCommentTotal" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM `leave` l
+        LEFT JOIN `user` u ON l.uid = u.id
+        <include refid="condition"/>
+    </select>
+    <select id="getAdminLeaveCommentPage" resultType="top.chao58.blog.entity.vo.admin.AdminCommentVo">
+        SELECT l.id,
+        u.`name`,
+        l.content,
+        l.create_time
+        FROM `leave` l
+        LEFT JOIN `user` u ON l.uid = u.id
+        <include refid="condition"/>
+        ORDER BY create_time DESC
+        LIMIT #{page},#{limit}
+    </select>
+
+
+    <update id="updateAdminLeaveComment">
+        UPDATE `leave`
+        SET content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteAdminLeaveCommentById">
+        DELETE
+        FROM `leave`
+        WHERE id = #{id}
+    </delete>
+
+    <select id="getAdminLeaveCommentsByPid" resultType="java.lang.Integer">
+        SELECT id
+        FROM `leave`
+        WHERE pid = ${pid};
+    </select>
+    <select id="getLeaveSize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM `leave`
+    </select>
+
+    <!--=============end=====================admin======================================================================================-->
+</mapper>

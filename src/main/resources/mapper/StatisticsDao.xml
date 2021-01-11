@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.StatisticsDao">
+
+    <insert id="initData">
+        INSERT INTO statistics(article_flow, user, article_comment, `leave`, link, date)
+        VALUES (0, 0, 0, 0, 0, #{date});
+    </insert>
+
+    <update id="incrData">
+        UPDATE statistics
+        <set>
+            <if test="statistics.articleFlow !=null and statistics.articleFlow !=0">
+                article_flow = article_flow + 1,
+            </if>
+            <if test="statistics.user !=null and statistics.user !=0">
+                `user` = `user` + 1,
+            </if>
+            <if test="statistics.articleComment !=null and statistics.articleComment !=0">
+                article_comment = article_comment +1,
+            </if>
+            <if test="statistics.leave !=null and statistics.leave !=0">
+                `leave` = `leave` +1,
+            </if>
+            <if test="statistics.link !=null and statistics.link !=0">
+                `link` = `link` +1,
+            </if>
+        </set>
+        WHERE `date` = #{statistics.date}
+    </update>
+    <select id="getStatisticsByDate" resultType="top.chao58.blog.entity.po.Statistics">
+        SELECT article_flow, user, article_comment, `leave`, link, date
+        FROM statistics
+        WHERE `date` = #{date}
+    </select>
+
+    <select id="getStatisticsBetweenDate" resultType="top.chao58.blog.entity.po.Statistics">
+        SELECT sum(article_flow)    article_flow,
+               sum(`user`)          `user`,
+               sum(article_comment) article_comment,
+               sum(`leave`)         `leave`,
+               sum(link)            link
+        FROM statistics
+        WHERE `date` &gt;= #{start}
+          and `date` &lt;= #{end}
+    </select>
+</mapper>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/page/link-api.js"></script>
+</head>
+
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">其他管理</a>
+                <a>
+                    <cite>友链管理</cite></a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input id="title" type="text" name="username" placeholder="网站名称" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button id="search" class="layui-btn">
+                                <i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button id="addLabel" class="layui-btn layui-btn-primary"><i class="iconfont">&#xe6b9;</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-card-body ">
+                    <table class="layui-hide" id="test" lay-filter="demo"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form class="layui-form" id="popForm" style="display:none;margin-top: 10px">
+    <div class="layui-form-item">
+        <label class="layui-form-label">网站名称：</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" required lay-verify="required" placeholder="请输入网站名称" autocomplete="off"
+                   class="layui-input" id="atitle" style="width:200px">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">Logo：</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" required lay-verify="required" placeholder="请输Logo路径" autocomplete="off"
+                   class="layui-input" id="logo" style="width:200px">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">描述：</label>
+        <div class="layui-input-block">
+            <textarea lay-verify="required" id="des" name="desc" placeholder="请输入描述" class="layui-textarea"
+                      style="width:200px"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">跳转链接：</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" required lay-verify="required" placeholder="请输入跳转链接" autocomplete="off"
+                   class="layui-input" id="url" style="width:200px">
+        </div>
+    </div>
+</form>
+</body>
+
+
+<script type="text/html" id="isHidden">
+    <input id="{{d.id}}" type="checkbox" name="lock" value="{{d.hidden}}" title="显示" lay-filter="isHidden"
+           {{ d.hidden==0 ? 'checked' : '' }}>
+</script>
+
+<script type="text/html" id="icon">
+    <img src="{{d.icon}}" height="100px"/>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    let linkTable;
+
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+        laydate.render({
+            elem: '#start'
+        });
+        laydate.render({
+            elem: '#end'
+        });
+    });
+
+    layui.use(['jquery', 'layer'], function () {
+        let $ = layui.jquery;
+        let layer = layui.layer;
+
+        $("#addLabel").click(function () {
+            layer.open({
+                type: 1,
+                area: ['350px', '400px'],
+                title: '添加友链'
+                , content: $("#popForm"),
+                shade: 0,
+                end: function () {
+                    linkTable.reload();
+                },
+                btn: ['提交', '取消']
+                , btn1: function (index) {
+                    let title = $("#atitle").val();
+                    let logo = $("#logo").val();
+                    let des = $("#des").val();
+                    let url = $("#url").val();
+                    if (title === '' || logo === '' || des === '' || url === '') {
+                        layer.msg("上述内容不能为空！");
+                        return;
+                    }
+                    addLink(-1, title, logo, des, url);
+                    layer.close(index);
+                },
+                btn2: function (index) {
+                    layer.close(index);
+                }
+            });
+        })
+    })
+
+    layui.use('form', function () {
+        var form = layui.form;
+        form.on('checkbox(isHidden)', function (obj) {
+            setHidden(obj.elem.id, obj.elem.checked)
+        });
+    })
+
+
+    layui.use(['table', 'util'], function () {
+        var table = layui.table;
+        table.on('edit(demo)', function (obj) {
+            setData(obj.data.id, obj.field, obj.value);
+        });
+
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                if (obj.event === 'del') {
+                    layer.confirm('一旦删除彻底消失，是否继续？', {
+                        icon: 2,
+                        title: '严重',
+                        end: function () {
+                            linkTable.reload();
+                        }
+                    }, function (index) {
+                        deleteLink(obj.data.id);
+                        layer.close(index);
+                    });
+                }
+            } else if (obj.event === 'setDes') {
+                layer.prompt({
+                    formType: 2
+                    , title: '【' + data.title + '】的描述'
+                    , value: data.des
+                }, function (value, index) {
+                    layer.close(index);
+                    obj.update({
+                        sign: value
+                    });
+                    alert(value);
+                });
+            }
+        });
+
+        linkTable = table.render({
+            elem: '#test'
+            , url: '/admin/link/getAdminLinkPage'
+            , page: {
+                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip']
+                , groups: 5
+                , first: false
+                , last: false
+            }
+            , cols: [[
+                {field: 'id', width: 60, title: 'ID', sort: true}
+                , {field: 'name', width: 120, title: '用户名称'}
+                , {field: 'title', width: 120, title: '网站名称', edit: true}
+                , {field: 'icon', width: 80, title: 'Logo', templet: '#icon', edit: true}
+                , {field: 'des', width: 200, title: '描述', event: 'setDes'}
+                , {field: 'url', width: 200, title: '跳转链接', edit: true}
+                , {field: 'sort', width: 80, title: '排序', sort: true, edit: true}
+                , {field: 'hidden', width: 110, title: '隐藏', sort: true, templet: '#isHidden'}
+                , {
+                    field: 'createTime',
+                    width: 160,
+                    title: '创建时间',
+                    sort: true,
+                    templet: "<div>{{layui.util.toDateString(d.createTime, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+                }
+                , {
+                    field: 'modifyTime',
+                    width: 160,
+                    title: '修改时间',
+                    sort: true,
+                    templet: "<div>{{layui.util.toDateString(d.modifyTime, 'yyyy-MM-dd HH:mm:ss')}}</div>"
+                }
+                , {fixed: 'right', width: 80, title: '操作', align: 'center', toolbar: '#barDemo'}
+            ]]
+        });
+
+        /*条件查询*/
+        $("#search").click(function () {
+            linkTable.reload({
+                url: '/admin/link/getAdminLinkPage'
+                , where: {
+                    title: $("#title").val(),
+                }
+                , page: {
+                    curr: 1
+                }
+            })
+        })
+
+
+    });
+</script>
+
+</html>

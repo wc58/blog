@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/jquery.min.js"></script>
+</head>
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">系统设置</a>
+                <a>
+                    <cite>OSS设置</cite>
+                </a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">endpoint：</label>
+                            <div class="layui-input-block">
+                                <input id="endpoint" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">accessKeyId：</label>
+                            <div class="layui-input-block">
+                                <input id="accessKeyId" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">accessKeySecret：</label>
+                            <div class="layui-input-block">
+                                <input id="accessKeySecret" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">bucketName：</label>
+                            <div class="layui-input-block">
+                                <input id="bucketName" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">ossSite：</label>
+                            <div class="layui-input-block">
+                                <input id="ossSite" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button id="commit" class="layui-btn">立即保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+
+
+    layui.use(['form'], function () {
+        let $ = layui.jquery;
+
+        /*数据回显*/
+        $(function () {
+            $.ajax({
+                type: 'get',
+                url: '/admin/properties/getOssProperties',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    $('#endpoint').val(data.endpoint);
+                    $('#accessKeyId').val(data.accessKeyId);
+                    $('#accessKeySecret').val(data.accessKeySecret);
+                    $('#bucketName').val(data.bucketName);
+                    $('#ossSite').val(data.ossSite);
+                }
+            })
+        })
+
+        /*表单提交*/
+        $("#commit").click(function () {
+            let endpoint = $("#endpoint").val();
+            let accessKeyId = $("#accessKeyId").val();
+            let accessKeySecret = $("#accessKeySecret").val();
+            let bucketName = $("#bucketName").val();
+            let ossSite = $("#ossSite").val();
+            $.ajax({
+                type: 'post',
+                url: '/admin/properties/updateOssProperties',
+                dataType: 'json',
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify({
+                    "endpoint": endpoint,
+                    "accessKeyId": accessKeyId,
+                    "accessKeySecret": accessKeySecret,
+                    "bucketName": bucketName,
+                    "ossSite": ossSite,
+                }),
+                success: function (data) {
+                    if (data.code === 0) {
+                        layer.msg("添加成功")
+                    } else {
+                        layer.msg("修改成功")
+                    }
+                }
+            })
+        })
+    });
+</script>
+</html>

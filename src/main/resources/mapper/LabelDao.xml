@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.LabelDao">
+    <select id="queryAllLabels" resultType="top.chao58.blog.entity.vo.LabelVo">
+        SELECT id,
+               id `value`,
+               name
+        FROM label
+        WHERE hidden = 0
+        ORDER BY sort DESC
+    </select>
+
+    <select id="queryLabelsByArticleId" resultType="java.lang.String">
+        SELECT name
+        FROM label
+        WHERE id IN (SELECT label_id FROM article_label a WHERE a.article_id = #{articleId})
+    </select>
+    <!--=============start=====================admin======================================================================================-->
+    <select id="getAdminLabelTotal" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM label
+    </select>
+    <select id="getAdminLabelPage" resultType="top.chao58.blog.entity.vo.admin.AdminLabelVo">
+        SELECT id,
+               name,
+               hidden,
+               sort
+        FROM label
+        ORDER BY sort DESC
+        LIMIT #{page},#{limit}
+    </select>
+    <select id="getAdminLabelArticleSize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM article_label
+        WHERE label_id = #{id}
+    </select>
+    <select id="getLabelIdsByArticleId" resultType="java.lang.Integer">
+        SELECT label_id
+        FROM article_label
+        WHERE article_id = #{id}
+    </select>
+
+    <update id="updateHiddenById">
+        UPDATE label
+        SET hidden = #{hiddenValue}
+        WHERE id = #{id}
+    </update>
+    <update id="updateDataById">
+        UPDATE label
+        <set>
+            <if test="labelDto.name != null and labelDto.name != ''">
+                name = #{labelDto.name},
+            </if>
+            <if test="labelDto.sort != null and labelDto.sort != ''">
+                sort = #{labelDto.sort}
+            </if>
+        </set>
+        WHERE id = #{labelDto.id}
+    </update>
+    <delete id="deleteLabelById">
+        DELETE
+        FROM label
+        WHERE hidden = 1
+          and id = #{id}
+    </delete>
+    <insert id="addLabel">
+        INSERT INTO label(name, sort, hidden)
+        VALUES (#{name}, 1, 0)
+    </insert>
+
+    <select id="getArticleIdsByLabelId" resultType="java.lang.Integer">
+        SELECT article_id
+        FROM article_label
+        WHERE label_id = #{labelId};
+    </select>
+    <select id="getLabelSize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM label
+    </select>
+    <!--=============end=====================admin======================================================================================-->
+</mapper>

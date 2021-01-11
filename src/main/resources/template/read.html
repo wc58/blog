@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width"/>
+    <title>文章阅读</title>
+    <link rel="icon" href="../static/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/static/css/master.css"/>
+    <link rel="stylesheet" href="/static/css/gloable.css"/>
+    <link rel="stylesheet" href="/static/css/nprogress.css"/>
+    <link rel="stylesheet" href="/static/css/blog.css"/>
+    <link rel="stylesheet" href="/static/css/message.css"/>
+    <!--    <link rel="stylesheet" href="/static/highlight/styles/atelier-lakeside-light.css">-->
+    <link rel="stylesheet" href="/static/highlight/styles/atelier-heath-light.css">
+    <!--    <link rel="stylesheet" href="/static/highlight/styles/atelier-forest-light.css">-->
+    <!--    <link rel="stylesheet" href="/static/highlight/styles/atelier-estuary-light.css">-->
+</head>
+<style th:inline="css">
+    .header {
+        margin: 0 auto;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        position: fixed !important;
+        background-image: url('[[${shareProperties.getBackgroundImage()}]]');
+        background-size: 100% 100%
+    }
+
+    /*标题h1 h2 h3样式*/
+    #content {
+        color: black;
+        font: 0.875em/1.5em "微软雅黑", "PTSans", "Arial", sans-serif;
+        font-size: 16px;
+    }
+
+    h1 {
+        background: #2B6695;
+        border-radius: 6px 6px 6px 6px;
+        box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+        color: #FFFFFF;
+        font-family: "微软雅黑", "宋体", "黑体", Arial;
+        font-size: 18px;
+        font-weight: bold;
+        height: 25px;
+        line-height: 25px;
+        margin: 18px 0 !important;
+        padding: 8px 0 5px 5px;
+        text-shadow: 2px 2px 3px #222222;
+    }
+
+    h2 {
+        background: #2B6600;
+        border-radius: 6px 6px 6px 6px;
+        box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+        color: #FFFFFF;
+        font-family: "微软雅黑", "宋体", "黑体", Arial;
+        font-size: 15px;
+        font-weight: bold;
+        height: 24px;
+        line-height: 23px;
+        margin: 12px 0 !important;
+        padding: 5px 0 5px 10px;
+        text-shadow: 2px 2px 3px #222222;
+    }
+
+    h3 {
+        background: #5B9600;
+        border-radius: 6px 6px 6px 6px;
+        box-shadow: 0 0 0 1px #5F5A4B, 1px 1px 6px 1px rgba(10, 10, 0, 0.5);
+        color: #FFFFFF;
+        font-family: "微软雅黑", "宋体", "黑体", Arial;
+        font-size: 13px;
+        font-weight: bold;
+        height: 24px;
+        line-height: 20px;
+        margin: 12px 0 !important;
+        padding: 5px 0 5px 10px;
+        text-shadow: 2px 2px 3px #222222;
+    }
+</style>
+<body>
+<div class="header">
+</div>
+<header class="gird-header">
+    <div class="header-fixed">
+        <div class="header-inner">
+            <a class="header-logo" th:text="${shareProperties.logo}">Mr.Yss</a>
+            <nav class="nav" id="nav">
+                <ul>
+                    <li th:each="navigation:${navigations}"><a th:href="${navigation.url}"
+                                                               th:text="${navigation.title}"></a></li>
+                </ul>
+            </nav>
+            <!--=============用户登录=============-->
+            <a th:if="${session.user} == null" onclick="login()" href="javascript:;" class="blog-user">
+                <i class="fa fa-qq"></i>
+            </a>
+            <a th:if="${session.user} != null" onclick="logout()" href="javascript:;" class="blog-user">
+                <img th:src="${session.user.icon}"
+                     th:alt="${session.user.name}"
+                     th:title="${session.user.name}"/>
+            </a>
+            <!--=============用户登录=============-->
+            <a class="phone-menu">
+                <i></i>
+                <i></i>
+                <i></i>
+            </a>
+        </div>
+    </div>
+</header>
+<div class="doc-container" id="doc-container">
+    <div class="container-fixed">
+        <div class="col-content" style="width:100%">
+            <div class="inner">
+                <article class="article-list">
+                    <input type="hidden" value="@Model.BlogTypeID" id="blogtypeid"/>
+                    <section class="article-item">
+                        <aside class="title" style="line-height:1.5;">
+                            <h4 th:text="${readArticleVo.title}"></h4>
+                            <p class="fc-grey fs-14">
+                                <small>
+                                    作者：<a th:text="${readArticleVo.author}" href="#" target="_blank"
+                                          class="fc-link"></a>
+                                </small>
+                                <small class="ml10">围观群众：<i class="readcount"
+                                                            th:text="${readArticleVo.flow}"></i></small>
+                                <small class="ml10">更新于 <label
+                                        th:text="${#dates.format(readArticleVo.modifyTime,'yyyy-MM-dd HH:mm:ss')}"></label>
+                                </small>
+                            </p>
+                        </aside>
+                        <div class="time mt10" style="padding-bottom:0;">
+                            <span class="day" th:text="${#dates.format(readArticleVo.modifyTime,'dd')}"></span>
+                            <span class="month fs-18">
+                              <span th:text="${#dates.format(readArticleVo.modifyTime,'MM')}"></span>  <small
+                                    class="fs-14">月</small></span>
+                            <span class="year fs-18" th:text="${#dates.format(readArticleVo.modifyTime,'yyyy')}"></span>
+                        </div>
+                        <div class="content artiledetail"
+                             style="border-bottom: 1px solid #e1e2e0; padding-bottom: 20px;">
+                            <!--内容-->
+                            <span th:utext="${readArticleVo.content}"></span>
+                            <div class="copyright mt20">
+                                <p class="f-toe fc-black">
+                                    非特殊说明，本文版权归 <span th:text="${readArticleVo.author}"></span> 所有，转载请注明出处.
+                                </p>
+                                <p class="f-toe">
+                                    本文标题：
+                                    <a href="#" class="r-title" th:text="${readArticleVo.title}"></a>
+                                </p>
+                                <p class="f-toe">
+                                    本文网址：
+                                    <a href="#"><span
+                                            th:text="${articleProperties.site}+'/read/'+${readArticleVo.id}"></span></a>
+                                </p>
+                            </div>
+                            <div id="aplayer" style="margin:5px 0"></div>
+                            <h6>延伸阅读</h6>
+                            <ol th:each="extendArticle:${extendArticles}" class="b-relation">
+                                <a th:href="${articleProperties.site}+'/read/'+${extendArticle.id}"
+                                   th:text="${extendArticle.title}"></a>
+                            </ol>
+                        </div>
+
+                        <fieldset class="layui-elem-field layui-field-title">
+
+                            <legend>发表评论</legend>
+                            <div class="textarea-wrap message" id="textarea-wrap">
+                                <br>
+                                <div>
+                                    <textarea id="tuArea" required lay-verify="required"
+                                              class="layui-textarea"></textarea>
+                                </div>
+                                <br/>
+                                <div>
+                                    <input type="button" style="border: none ">
+                                    <input id="tuButton" type="button" style="float: right" class="layui-btn"
+                                           value="提交">
+                                </div>
+                            </div>
+                        </fieldset>
+
+                    </section>
+                    <div class="mt20">
+                        <ul class="message-list" id="message-list">
+                            <li th:each="articleCommentVo:${articleCommentVos}" class="zoomIn article">
+                                <div class="comment-parent">
+                                    <a name="remark-1"></a>
+                                    <img th:src="${articleCommentVo.icon}"/>
+                                    <div class="info">
+                                        <span class="username" th:text="${articleCommentVo.name}"></span>
+                                        <span th:if="${articleCommentVo.tid} eq '8E1544B0D015EC98612B39DD5D5B90B0'"
+                                              class="layui-badge layui-bg-green">博主</span>
+                                    </div>
+                                    <!--内容-->
+                                    <div style="white-space: pre-line;" class="comment-content"
+                                         th:text="${articleCommentVo.content}"></div>
+                                    <p class="info info-footer">
+                            <span class="comment-time"
+                                  th:text="${#dates.format(articleCommentVo.createTime,'yyyy-MM-dd HH:mm:ss')}"></span>
+                                        <a href="javascript:;" class="btn-reply"
+                                           th:data-targetid="${articleCommentVo.id}"
+                                           th:data-targetname="${articleCommentVo.name}">回复</a>
+                                    </p>
+                                </div>
+                                <div class="comment-child"
+                                     th:each="childrenArticleCommon:${articleCommentVo.childrenArticleCommons}">
+                                    <hr/>
+                                    <a name="reply-1"></a>
+                                    <img th:src="${childrenArticleCommon.icon}">
+                                    <div class="info">
+                                        <div>
+                                                <span style="color: #0C0C0C" class="username"
+                                                      th:text="${childrenArticleCommon.name}"></span>
+                                            <span th:if="${childrenArticleCommon.tid} eq '8E1544B0D015EC98612B39DD5D5B90B0'"
+                                                  class="layui-badge layui-bg-green"
+                                                  style="height: 16px;font-size: 9px;">博主</span>&nbsp;
+                                            <span style="padding-right:0;margin-left:-5px;color: gray">回复</span>
+                                            <i><span class="username"
+                                                     th:text="${childrenArticleCommon.parentName}"></span></i>
+                                        </div>
+                                        <!--内容-->
+                                        <span style="white-space: pre-line;"
+                                              th:text="${childrenArticleCommon.content}"></span>
+                                    </div>
+                                    <p class="info">
+                            <span class="comment-time"
+                                  th:text="${#dates.format(childrenArticleCommon.createTime,'yyyy-MM-dd HH:mm:ss')}"></span>
+                                        <a href="javascript:;" class="btn-reply"
+                                           th:data-targetid="${childrenArticleCommon.id}"
+                                           th:data-targetname="${childrenArticleCommon.name}">回复</a>
+                                    </p>
+                                </div>
+
+                                <div class="replycontainer layui-hide">
+                                    <div class="layui-form">
+                                        <input type="hidden" name="remarkId" value="1">
+                                        <input type="hidden" name="targetUserId" value="0">
+                                        <div class="layui-form-item">
+                                <textarea name="replyContent" lay-verify="replyContent" placeholder="请输入回复内容"
+                                          class="layui-textarea" style="min-height:80px;"></textarea>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <button class="layui-btn layui-btn-xs" lay-submit="formReply"
+                                                    lay-filter="formReply">
+                                                提交
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="grid-footer">
+    <div class="footer-fixed">
+        <div class="copyright">
+            <div class="info">
+                <!--底部信息-->
+                <span th:text="${shareProperties.copyright}"></span> <a th:href="${shareProperties.record_url}">
+                <i th:text="${shareProperties.record_title}" style="color: gray"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="/static/layui/layui.js"></script>
+<script src="/static/js/yss/gloable.js"></script>
+<script src="/static/js/plugins/nprogress.js"></script>
+<script src="/static/highlight/highlight.pack.js"></script>
+<script src="/static/js/user.js"></script>
+<script>NProgress.start();</script>
+<script>
+    hljs.initHighlightingOnLoad();
+
+    layui.use(['jquery', 'layer'], function () {
+        let $ = layui.jquery;
+        let layer = layui.layer;
+        let userId = '[[${session.userId}]]';
+        let loginStatus = '[[${readArticleVo.login}]]';
+
+        $(function () {
+            NProgress.done();
+            if (userId === '' && loginStatus === '1') {
+                layer.confirm('必须登录才可以查看，是否登录', {
+                    icon: 3
+                    , title: '提示'
+                    , shade: 0.9
+                    , closeBtn: 0
+                    , btn: ['登录', '不看了']
+                    , btn2: function () {
+                        location.href = "/article"
+                    }
+                }, function (index) {
+                    login();
+                    layer.close(index);
+                });
+            }
+
+
+        });
+
+
+        $("#tuButton").click(function () {
+            let content = $("#tuArea").val();
+            replyLeave($, 0, content);
+        })
+    })
+
+    function replyLeave($, pid, content) {
+        //登录成功
+        let userId = '[[${session.userId}]]';
+        let articleId = '[[${readArticleVo.id}]]';
+        if (userId === '') {
+            layer.msg("请先登录")
+            return;
+        }
+        if (content === '') {
+            layer.msg("内容不能为空");
+            return;
+        }
+        $.ajax({
+            type: 'post',
+            url: "/article/reply",
+            data: {
+                'articleId': articleId,
+                'userId': userId,
+                'content': content,
+                'pid': pid
+            },
+            success: function (data) {
+                if (data === 200) {
+                    history.go(0);
+                } else {
+                    layer.msg("添加失败，请重试")
+                }
+            },
+            typeDate: 'json'
+        })
+    }
+
+    var area;
+    layui.use(['element', 'jquery', 'form', 'layedit', 'flow'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        let pid;
+        //留言的编辑器的验证
+        form.verify({
+            replyContent: function (content) {
+                replyLeave($, pid, content);
+            }
+        });
+        //回复按钮点击事件
+        $('#message-list').on('click', '.btn-reply', function () {
+            var targetId = $(this).data('targetid')
+                , targetName = $(this).data('targetname')
+                , $container = $(this).parent('p').parent().siblings('.replycontainer');
+            if ($(this).text() == '回复') {
+                pid = targetId;
+                $container.find('textarea').attr('placeholder', '回复【' + targetName + '】');
+                $container.removeClass('layui-hide');
+                $container.find('input[name="targetUserId"]').val(targetId);
+                $(this).parents('.message-list li').find('.btn-reply').text('回复');
+                $(this).text('收起');
+            } else {
+                $container.addClass('layui-hide');
+                $container.find('input[name="targetUserId"]').val(0);
+                $(this).text('回复');
+            }
+        });
+
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <link rel="stylesheet" href="../../static/highlight/styles/atelier-heath-light.css">
+</head>
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">文章管理</a>
+                <a>
+                    <cite>发布文章</cite>
+                </a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">标题：</label>
+                            <div class="layui-input-block">
+                                <input id="title" type="text" placeholder="请输入标题" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">描述：</label>
+                            <div class="layui-input-block">
+                                <textarea id="des" placeholder="请输入描述" class="layui-textarea"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">标签：</label>
+                            <div class="layui-input-block">
+                                <div id="label"></div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">状态：</label>
+                            <div class="layui-input-block">
+                                <input id="status" type="text" name="title" required placeholder="请输入状态"
+                                       autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">属性：</label>
+                            <div class="layui-input-block">
+                                <input type="checkbox" id="show" value="show" title="展示">
+                                <input type="checkbox" id="top" value="top" title="置顶">
+                                <input type="checkbox" id="login" value="login" title="登录">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">封面：</label>
+                            <div class="layui-input-block">
+                                <div class="layui-upload">
+                                    <button type="button" class="layui-btn" id="uploadCover">上传封面</button>
+                                    <div class="layui-upload-list">
+                                        <img id="cover" class="layui-upload-img" height="150" width="250>
+                                        <p id=" demoText"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <div id="content">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button id="commit" class="layui-btn">立即提交</button>
+                                <button onclick="location.reload()" class="layui-btn layui-btn-primary">重置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../../static/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="../../static/js/xadmin.js"></script>
+<script src="../../static/js/xm-select.js"></script>
+<script src="../../static/js/page/article-api.js"></script>
+<script src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/page/common.js"></script>
+<script src="../../static/js/wangEditor.min.js"></script>
+<script src="../../static/highlight/highlight.pack.js"></script>
+<script>
+    const E = window.wangEditor
+    const editor = new E('#content')
+    editor.highlight = hljs
+    editor.config.uploadImgServer = '/admin/image/uploadArticleImage'
+    editor.config.uploadImgMaxLength = 5
+    editor.config.showLinkImg = false
+    editor.config.uploadImgTimeout = 300 * 1000
+    editor.config.uploadFileName = 'article'
+    editor.config.languageType = [
+        'Bash',
+        'Java',
+        'JavaScript',
+        'JSON',
+        'Html',
+        'XML',
+        'SQL',
+        'Markdown'
+    ]
+    editor.create()
+    let id = -1;
+    let form;
+    let select;
+
+    $(function () {
+        id = getQueryVariable("id");
+        /*标签加载*/
+        $.ajax({
+            type: 'get',
+            url: '/admin/label/getSelectLabels?id=' + id,
+            dataType: 'json',
+            async: false,
+            success: function (data) {
+                select = xmSelect.render({
+                    // 这里绑定css选择器
+                    el: '#label',
+                    // 渲染的数据
+                    data: data,
+                });
+            }
+        })
+    })
+
+
+    layui.use(['form', 'upload'], function () {
+        let $ = layui.jquery;
+        let upload = layui.upload;
+        form = layui.form;
+
+
+        /*数据回显*/
+        $(function () {
+            if (id === -1) return;
+            $.ajax({
+                type: 'get',
+                url: '/admin/article/getAdminArticleById?id=' + id,
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    if (data.code === 0) {
+                        let articleData = data.data[0];
+                        $('#title').val(articleData.title);
+                        $('#des').val(articleData.des);
+                        $('#status').val(articleData.status);
+                        $('#cover').attr('src', articleData.cover);
+                        if (articleData.hidden === 0) {
+                            $('#show').prop('checked', 'true');
+                        }
+                        if (articleData.top !== 0) {
+                            $('#top').prop('checked', 'true');
+                        }
+                        if (articleData.login !== 0) {
+                            $('#login').prop('checked', 'true');
+                        }
+                        editor.txt.html(articleData.content);
+                        form.render();
+                    } else {
+                        layer.msg("数据回显失败")
+                    }
+                }
+            })
+        })
+
+
+        /*普通图片上传*/
+        upload.render({
+            elem: '#uploadCover'
+            , url: '/admin/image/uploadCoverImage'
+            , done: function (res) {
+                let src = $('#cover').prop('src');
+                if (src !== '') {
+                    deleteCoverImage(src, true);
+                }
+                $('#cover').attr('src', res.data[0]);
+            }
+        });
+
+        /*删除图片*/
+        $("#cover").dblclick(function () {
+            let src = $('#cover').prop('src');
+            if (src !== '') {
+                deleteCoverImage(src, true);
+                $('#cover').removeAttr('src');
+            }
+        });
+
+
+        /*表单提交*/
+        $("#commit").click(function () {
+            let title = $("#title").val();
+            let des = $("#des").val();
+            let cover = $('#cover').prop('src');
+            let content = editor.txt.html();
+            let labels = select.getValue('value');
+            let status = $("#status").val();
+            let show = $("#show").prop("checked");
+            let top = $("#top").prop("checked");
+            let login = $("#login").prop("checked");
+            $.ajax({
+                type: 'post',
+                url: '/admin/article/addOrUpdateArticle',
+                dataType: 'json',
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify({
+                    "id": id,
+                    "title": title,
+                    "des": des,
+                    "cover": cover,
+                    "content": content,
+                    "status": status,
+                    "show": show,
+                    "top": top,
+                    "login": login,
+                    "labels": labels
+                }),
+                success: function (data) {
+                    if (data.code === 0) {
+                        if (id === -1) {
+                            layer.msg("添加成功")
+                        } else {
+                            layer.msg("修改成功")
+                        }
+                        id = data.id;
+                    } else {
+                        if (id === -1) {
+                            layer.msg("添加成功")
+                        } else {
+                            layer.msg("修改成功")
+                        }
+                    }
+                }
+            })
+        })
+
+
+    });
+</script>
+</html>

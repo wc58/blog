@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.DiaryDao">
+
+
+    <select id="getDiaries" resultType="top.chao58.blog.entity.vo.DiaryVo">
+        SELECT content,
+               create_time
+        FROM diary
+        WHERE hidden = 0
+          and create_time &gt; #{statTime}
+          and create_time &lt; #{endTime}
+        ORDER BY create_time DESC
+    </select>
+    <!--=============start=====================admin======================================================================================-->
+    <!--分页条件-->
+    <sql id="condition">
+        WHERE del = #{recycle}
+        <if test="baseQo.startTime != '' and baseQo.startTime != null">
+            AND create_time &gt;= #{baseQo.startTime}
+        </if>
+        <if test="baseQo.endTime != '' and baseQo.endTime != null">
+            AND create_time &lt;= #{baseQo.endTime}
+        </if>
+    </sql>
+    <select id="getAdminDiaryTotal" resultType="java.lang.Integer">
+        select count(1)
+        from diary
+        <include refid="condition"/>
+    </select>
+    <select id="getAdminDiaryPage" resultType="top.chao58.blog.entity.vo.admin.AdminDiaryVo">
+        SELECT id,
+        content,
+        hidden,
+        create_time,
+        delete_time
+        FROM diary
+        <include refid="condition"/>
+        ORDER by create_time DESC
+        LIMIT #{page}, #{limit}
+    </select>
+
+    <!--设置隐藏值-->
+    <update id="updateHiddenById">
+        UPDATE diary
+        SET hidden = #{hiddenValue}
+        WHERE id = #{id}
+    </update>
+    <update id="recycleDiary">
+        UPDATE diary
+        SET hidden      = 1,
+            del         = 1,
+            delete_time = #{deleteTime}
+        WHERE id = #{id}
+    </update>
+    <update id="restoreDiary">
+        UPDATE diary
+        SET del = 0
+        WHERE id = #{id}
+    </update>
+    <update id="updateDataById">
+        UPDATE diary
+        SET content = #{diaryDto.content}
+        WHERE id = #{diaryDto.id}
+    </update>
+
+    <delete id="deleteDiaryById">
+        DELETE
+        FROM diary
+        where id = #{id}
+          and del = 1
+    </delete>
+
+    <insert id="addDiary" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO diary(content, content_img, hidden, del, create_time)
+        VALUES (#{diary.content}, #{diary.contentImg}, #{diary.hidden}, #{diary.del}, #{diary.createTime})
+    </insert>
+
+    <update id="updateDiary">
+        UPDATE diary
+        SET content     = #{content},
+            content_img = #{contentImg}
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="getAdminDiaryById" resultType="top.chao58.blog.entity.vo.admin.AdminDiaryVo">
+        SELECT content
+        FROM diary
+        WHERE id = #{id}
+    </select>
+    <select id="getDiarySize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM diary
+    </select>
+    <!--=============end=====================admin======================================================================================-->
+</mapper>

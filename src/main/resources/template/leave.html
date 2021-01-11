@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width"/>
+    <meta name="author" content="www.yanshisan.cn"/>
+    <meta name="robots" content="all"/>
+    <title>留言板</title>
+    <link rel="icon" href="../static/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="../static/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../static/layui/css/layui.css"/>
+    <link rel="stylesheet" href="../static/css/master.css"/>
+    <link rel="stylesheet" href="../static/css/gloable.css"/>
+    <link rel="stylesheet" href="../static/css/nprogress.css"/>
+    <link rel="stylesheet" href="../static/css/message.css"/>
+</head>
+<style th:inline="css">
+    .header {
+        margin: 0 auto;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        position: fixed !important;
+        background-image: url('[[${shareProperties.getBackgroundImage()}]]');
+        background-size: 100% 100%
+    }
+</style>
+<body>
+<div class="header">
+</div>
+<header class="gird-header">
+    <div class="header-fixed">
+        <div class="header-inner">
+            <a class="header-logo" th:text="${shareProperties.logo}">Mr.Yss</a>
+            <nav class="nav" id="nav">
+                <ul>
+                    <li th:each="navigation:${navigations}"><a th:href="${navigation.url}"
+                                                               th:text="${navigation.title}"></a></li>
+                </ul>
+            </nav>
+            <!--=============用户登录=============-->
+            <a th:if="${session.user} == null" onclick="login()" href="javascript:;" class="blog-user">
+                <i class="fa fa-qq"></i>
+            </a>
+            <a th:if="${session.user} != null" onclick="logout()" href="javascript:;" class="blog-user">
+                <img th:src="${session.user.icon}"
+                     th:alt="${session.user.name}"
+                     th:title="${session.user.name}"/>
+            </a>
+            <!--=============用户登录=============-->
+            <a class="phone-menu">
+                <i></i>
+                <i></i>
+                <i></i>
+            </a>
+        </div>
+    </div>
+</header>
+<div class="doc-container" id="doc-container">
+    <div class="container-fixed">
+        <div class="container-inner">
+            <section class="msg-remark">
+                <h1 th:text="${leaveProperties.header}"></h1>
+                <p th:text="${leaveProperties.description}">
+
+                </p>
+            </section>
+            <div class="textarea-wrap message" id="textarea-wrap">
+                <div>
+                <textarea id="tuArea" required lay-verify="required" th:placeholder="${leaveProperties.placeholder}"
+                          class="layui-textarea"></textarea>
+                </div>
+                <br/>
+                <div>
+                    <input type="button" style="border: none ">
+                    <input id="tuButton" type="button" style="float: right" class="layui-btn" value="提交">
+                </div>
+            </div>
+        </div>
+        <div class="f-cb"></div>
+        <div class="mt20">
+            <ul class="message-list" id="message-list">
+                <li th:each="leave:${leaves}" class="zoomIn article">
+                    <div class="comment-parent">
+                        <a name="remark-1"></a>
+                        <img th:src="${leave.icon}"/>
+                        <div class="info">
+                            <span class="username" th:text="${leave.name}"></span>
+                            <span th:if="${leave.tid} eq '8E1544B0D015EC98612B39DD5D5B90B0'"
+                                  class="layui-badge layui-bg-green">博主</span>
+                        </div>
+                        <!--内容-->
+                        <div style="white-space: pre-line;" class="comment-content" th:text="${leave.content}"></div>
+                        <p class="info info-footer">
+                            <span class="comment-time"
+                                  th:text="${#dates.format(leave.createTime,'yyyy-MM-dd HH:mm:ss')}"></span>
+                            <a href="javascript:;" class="btn-reply" th:data-targetid="${leave.id}"
+                               th:data-targetname="${leave.name}">回复</a>
+                        </p>
+                    </div>
+                    <div class="comment-child" th:each="childrenLeave:${leave.childrenLeaves}">
+                        <hr/>
+                        <a name="reply-1"></a>
+                        <img th:src="${childrenLeave.icon}">
+                        <div class="info">
+                            <div>
+                                <span style="color: #0C0C0C" class="username" th:text="${childrenLeave.name}"></span>
+                                <span th:if="${childrenLeave.tid} eq '8E1544B0D015EC98612B39DD5D5B90B0'"
+                                      class="layui-badge layui-bg-green" style="height: 16px;font-size: 9px;">博主</span>&nbsp;
+                                <span style="padding-right:0;margin-left:-5px;color: gray">回复</span>
+                                <i><span class="username" th:text="${childrenLeave.parentName}"></span></i>
+                            </div>
+                            <!--内容-->
+                            <span style="white-space: pre-line;" th:text="${childrenLeave.content}"></span>
+                        </div>
+                        <p class="info">
+                            <span class="comment-time"
+                                  th:text="${#dates.format(childrenLeave.createTime,'yyyy-MM-dd HH:mm:ss')}"></span>
+                            <a href="javascript:;" class="btn-reply" th:data-targetid="${childrenLeave.id}"
+                               th:data-targetname="${childrenLeave.name}">回复</a>
+                        </p>
+                    </div>
+
+
+                    <div class="replycontainer layui-hide">
+                        <div class="layui-form">
+                            <input type="hidden" name="remarkId" value="1">
+                            <input type="hidden" name="targetUserId" value="0">
+                            <div class="layui-form-item">
+                                <textarea name="replyContent" lay-verify="replyContent" placeholder="请输入回复内容"
+                                          class="layui-textarea" style="min-height:80px;"></textarea>
+                            </div>
+                            <div class="layui-form-item">
+                                <button class="layui-btn layui-btn-xs" lay-submit="formReply" lay-filter="formReply">
+                                    提交
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<footer class="grid-footer">
+    <div class="footer-fixed">
+        <div class="copyright">
+            <div class="info">
+                <!--底部信息-->
+                <span th:text="${shareProperties.copyright}"></span> <a th:href="${shareProperties.record_url}">
+                <i th:text="${shareProperties.record_title}" style="color: gray"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+<script src="../static/layui/layui.js"></script>
+<script src="../static/js/yss/gloable.js"></script>
+<script src="../static/js/plugins/nprogress.js"></script>
+<script src="../static/js/user.js"></script>
+<script>NProgress.start();</script>
+<script>
+    window.onload = function () {
+        NProgress.done();
+    };
+    layui.use('jquery', function () {
+        let $ = layui.jquery;
+        $("#tuButton").click(function () {
+            let content = $("#tuArea").val();
+            replyLeave($, 0, content);
+        })
+    })
+
+    function replyLeave($, pid, content) {
+        //登录成功
+        let userId = '[[${session.userId}]]';
+        if (userId === '') {
+            layer.msg("请先登录")
+            return;
+        }
+        if (content === '') {
+            layer.msg("内容不能为空");
+            return;
+        }
+        $.ajax({
+            type: 'post',
+            url: "/leave/reply",
+            data: {
+                'userId': userId,
+                'content': content,
+                'pid': pid
+            },
+            success: function (data) {
+                if (data === 200) {
+                    history.go(0);
+                } else {
+                    layer.msg("添加失败，请重试")
+                }
+            },
+            typeDate: 'json'
+        })
+    }
+
+    var area;
+    layui.use(['element', 'jquery', 'form', 'layedit', 'flow'], function () {
+        var form = layui.form;
+        var $ = layui.jquery;
+        let pid;
+        //留言的编辑器的验证
+        form.verify({
+            replyContent: function (content) {
+                replyLeave($, pid, content);
+            }
+        });
+        //回复按钮点击事件
+        $('#message-list').on('click', '.btn-reply', function () {
+            var targetId = $(this).data('targetid')
+                , targetName = $(this).data('targetname')
+                , $container = $(this).parent('p').parent().siblings('.replycontainer');
+            if ($(this).text() == '回复') {
+                pid = targetId;
+                $container.find('textarea').attr('placeholder', '回复【' + targetName + '】');
+                $container.removeClass('layui-hide');
+                $container.find('input[name="targetUserId"]').val(targetId);
+                $(this).parents('.message-list li').find('.btn-reply').text('回复');
+                $(this).text('收起');
+            } else {
+                $container.addClass('layui-hide');
+                $container.find('input[name="targetUserId"]').val(0);
+                $(this).text('回复');
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

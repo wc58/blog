@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.LinkDao">
+
+
+    <select id="queryLinks" resultType="top.chao58.blog.entity.vo.LinkVo">
+        SELECT title,
+               des,
+               icon,
+               url
+        FROM link
+        WHERE hidden = 0
+        ORDER BY sort DESC
+    </select>
+
+    <insert id="addLink">
+        INSERT INTO link (uid, title, icon, des, url, sort, hidden, create_time, modify_time)
+        VALUES (#{link.uid}, #{link.title}, #{link.icon}, #{link.des}, #{link.url}, #{link.sort}, #{link.hidden},
+                #{link.createTime},
+                #{link.modifyTime});
+    </insert>
+
+    <!--=============start=====================admin======================================================================================-->
+    <sql id="condition">
+        <if test="title !=null and title != ''">
+            where l.`title` LIKE "%"#{title}"%"
+        </if>
+    </sql>
+    <select id="getAdminLinkTotal" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM link l
+        <include refid="condition"/>
+    </select>
+    <select id="getAdminLinkPage" resultType="top.chao58.blog.entity.vo.admin.AdminLinkVo">
+        SELECT l.id,
+        u.`name`,
+        l.title,
+        l.icon,
+        l.des,
+        l.url,
+        l.sort,
+        l.hidden,
+        l.create_time,
+        l.modify_time
+        FROM link l
+        LEFT JOIN `user` u ON l.uid = u.id
+        <include refid="condition"/>
+        ORDER BY l.sort DESC
+        LIMIT #{page},#{limit}
+    </select>
+    <select id="getLinkSize" resultType="java.lang.Integer">
+        SELECT count(1)
+        FRom link
+    </select>
+
+    <update id="updateHiddenById">
+        UPDATE link
+        SET hidden = #{hiddenValue}
+        WHERE id = #{id}
+    </update>
+    <update id="updateDataById">
+        UPDATE link
+        <set>
+            <if test="linkDto.title != null and linkDto.title != ''">
+                title = #{linkDto.title},
+            </if>
+            <if test="linkDto.logo != null and linkDto.logo != ''">
+                logo = #{linkDto.logo},
+            </if>
+            <if test="linkDto.dsc != null and linkDto.dsc != ''">
+                dsc = #{linkDto.dsc},
+            </if>
+            <if test="linkDto.url != null and linkDto.url != ''">
+                url = #{linkDto.url},
+            </if>
+            <if test="linkDto.sort != null and linkDto.sort != ''">
+                sort = #{linkDto.sort},
+            </if>
+            modify_time = #{linkDto.modifyTime}
+        </set>
+        WHERE id = #{linkDto.id}
+    </update>
+
+    <delete id="deleteLinkById">
+        DELETE
+        FROM link
+        WHERE id = #{id}
+          and hidden = 1
+    </delete>
+    <!--=============end=====================admin======================================================================================-->
+</mapper>

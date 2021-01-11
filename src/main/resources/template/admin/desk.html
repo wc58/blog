@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="x-admin-sm" lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="UTF-8">
+    <title>往事随风 - 后台管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <blockquote class="layui-elem-quote">欢迎管理员：
+                        <span class="x-red" th:text="${session.admin.nickname}"></span></span>！当前时间:<span
+                                id="cg"></span>
+                        <script>setInterval("cg.innerHTML=new Date().toLocaleString()", 1000);</script>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+        <a href="javascript:;" onclick="location.reload()">刷新</a>
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-header">数据统计</div>
+                <div class="layui-card-body ">
+                    <ul class="layui-row layui-col-space10 layui-this x-admin-carousel x-admin-backlog">
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>建站时间</h3>
+                                <p>
+                                    <cite th:text="${build}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>实习倒计时</h3>
+                                <p>
+                                    <cite th:text="${practice}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>文章数</h3>
+                                <p>
+                                    <cite th:text="${articleSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>用户数</h3>
+                                <p>
+                                    <cite th:text="${userSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>评论数</h3>
+                                <p>
+                                    <cite th:text="${articleCommentSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6 ">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>吐槽数</h3>
+                                <p>
+                                    <cite th:text="${leaveSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>标签数</h3>
+                                <p>
+                                    <cite th:text="${labelSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>友链数</h3>
+                                <p>
+                                    <cite th:text="${linkSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>文章浏览数</h3>
+                                <p>
+                                    <cite th:text="${flowSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>日记数</h3>
+                                <p>
+                                    <cite th:text="${diarySize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>置顶数</h3>
+                                <p>
+                                    <cite th:text="${articleTopSize}"></cite></p>
+                            </a>
+                        </li>
+                        <li class="layui-col-md2 layui-col-xs6 ">
+                            <a href="javascript:;" class="x-admin-backlog-body">
+                                <h3>管理员数</h3>
+                                <p>
+                                    <cite th:text="${adminSize}"></cite></p>
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <table class="layui-table">
+                    <thead>
+                    <tr>
+                        <th>统计</th>
+                        <th>文章浏览量</th>
+                        <th>用户量</th>
+                        <th>文章评论量</th>
+                        <th>留言评论量</th>
+                        <th>友链量</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>今日</td>
+                        <td><span th:text="${today.articleFlow}"></span></td>
+                        <td><span th:text="${today.user}"></span></td>
+                        <td><span th:text="${today.articleComment}"></span></td>
+                        <td><span th:text="${today.leave}"></span></td>
+                        <td><span th:text="${today.link}"></span></td>
+                    </tr>
+                    <tr>
+                        <td>昨日</td>
+                        <td><span th:text="${yesterday.articleFlow}"></span></td>
+                        <td><span th:text="${yesterday.user}"></span></td>
+                        <td><span th:text="${yesterday.articleComment}"></span></td>
+                        <td><span th:text="${yesterday.leave}"></span></td>
+                        <td><span th:text="${yesterday.link}"></span></td>
+                    </tr>
+                    <tr>
+                        <td>最近一周</td>
+                        <td><span th:text="${week.articleFlow}"></span></td>
+                        <td><span th:text="${week.user}"></span></td>
+                        <td><span th:text="${week.articleComment}"></span></td>
+                        <td><span th:text="${week.leave}"></span></td>
+                        <td><span th:text="${week.link}"></span></td>
+                    </tr>
+                    <tr>
+                        <td>最近一月</td>
+                        <td><span th:text="${month.articleFlow}"></span></td>
+                        <td><span th:text="${month.user}"></span></td>
+                        <td><span th:text="${month.articleComment}"></span></td>
+                        <td><span th:text="${month.leave}"></span></td>
+                        <td><span th:text="${month.link}"></span></td>
+                    </tr>
+                    <tr>
+                        <td>最近一年</td>
+                        <td><span th:text="${year.articleFlow}"></span></td>
+                        <td><span th:text="${year.user}"></span></td>
+                        <td><span th:text="${year.articleComment}"></span></td>
+                        <td><span th:text="${year.leave}"></span></td>
+                        <td><span th:text="${year.link}"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header">系统信息</div>
+            <div class="layui-card-body ">
+                <table class="layui-table">
+                    <tbody>
+                    <tr>
+                        <th>当前sessionID</th>
+                        <td><span th:text="${sessionId}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>用户名称</th>
+                        <td><span th:text="${USERNAME}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>计算机名称</th>
+                        <td><span th:text="${COMPUTERNAME}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>系统名称</th>
+                        <td><span th:text="${osName}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>系统构架</th>
+                        <td><span th:text="${osArch}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>系统版本</th>
+                        <td><span th:text="${osVersion}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>IP地址</th>
+                        <td><span th:text="${ip}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>项目所在目录</th>
+                        <td><span th:text="${userDir}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>JVM名称</th>
+                        <td><span th:text="${javaVmName}"></span></td>
+
+                    </tr>
+                    <tr>
+                        <th>JVM版本号</th>
+                        <td><span th:text="${javaVersion}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>JVM安装路径</th>
+                        <td><span th:text="${javaHome}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>JVM可用处理器个数</th>
+                        <td><span th:text="${availableProcessors}"></span></td>
+
+                    </tr>
+                    <tr>
+                        <th>JVM可用的总内存</th>
+                        <td><span th:text="${totalMemory}+' MB'"></span></td>
+                    </tr>
+                    <tr>
+                        <th>JVM可用的剩余内存</th>
+                        <td><span th:text="${freeMemory}+' MB'"></span></td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.chao58.blog.dao.ImageDao">
+
+    <insert id="addImage">
+        INSERT INTO image(oss_path, oss_name, original_name, type, create_time)
+        VALUES (#{image.ossPath}, #{image.ossName}, #{image.originalName}, #{image.type}, #{image.createTime})
+    </insert>
+
+    <select id="checkCoverImage" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM article_core
+        WHERE cover like "%"#{ossPath}"%"
+    </select>
+    <select id="checkArticleImage" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM article_core
+        WHERE content_img like "%"#{ossPath}"%"
+    </select>
+    <select id="checkDiaryImage" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM diary
+        WHERE content_img like "%"#{ossPath}"%"
+    </select>
+    <select id="getPictureList" resultType="top.chao58.blog.entity.po.Image">
+        SELECT id,
+               oss_path,
+               oss_name
+        FROM image
+        WHERE type = #{type}
+        ORDER BY create_time DESC
+        LIMIT #{currentPage}, 10;
+    </select>
+    <select id="getTotal" resultType="java.lang.Integer">
+        select count(1)
+        from image
+        where type = #{type};
+    </select>
+    <select id="getAllImages" resultType="top.chao58.blog.entity.po.Image">
+        SELECT oss_path,
+               type
+        FROM image
+    </select>
+
+    <delete id="deleteImage">
+        DELETE
+        FROM image
+        WhERE oss_path = #{ossPath}
+    </delete>
+
+</mapper>

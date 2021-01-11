@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/js/xadmin.js"></script>
+    <script src="../../static/js/jquery.min.js"></script>
+</head>
+<body>
+<div class="x-nav">
+               <span class="layui-breadcrumb">
+                <a href="javascript:">首页</a>
+                <a href="javascript:">系统设置</a>
+                <a>
+                    <cite>友链设置</cite>
+                </a>
+            </span>
+    <a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right"
+       onclick="location.reload()" title="刷新">
+        <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i>
+    </a>
+</div>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">header：</label>
+                            <div class="layui-input-block">
+                                <input id="header" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">description：</label>
+                            <div class="layui-input-block">
+                                <input id="description" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">linkSize：</label>
+                            <div class="layui-input-block">
+                                <input id="linkSize" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">title：</label>
+                            <div class="layui-input-block">
+                                <input id="title" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">site：</label>
+                            <div class="layui-input-block">
+                                <input id="site" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">icon：</label>
+                            <div class="layui-input-block">
+                                <input id="icon" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">siteDescription：</label>
+                            <div class="layui-input-block">
+                                <input id="siteDescription" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label" style="width: 100px">bottomDescription：</label>
+                            <div class="layui-input-block">
+                                <input id="bottomDescription" type="text" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button id="commit" class="layui-btn">立即保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+
+
+    layui.use(['form'], function () {
+        let $ = layui.jquery;
+
+        /*数据回显*/
+        $(function () {
+            $.ajax({
+                type: 'get',
+                url: '/admin/properties/getLinkProperties',
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    $('#header').val(data.header);
+                    $('#description').val(data.description);
+                    $('#linkSize').val(data.linkSize);
+
+                    $('#title').val(data.title);
+                    $('#site').val(data.site);
+                    $('#icon').val(data.icon);
+                    $('#siteDescription').val(data.siteDescription);
+
+                    $('#bottomDescription').val(data.bottomDescription);
+                }
+            })
+        })
+
+        /*表单提交*/
+        $("#commit").click(function () {
+            let header = $("#header").val();
+            let description = $("#description").val();
+            let linkSize = $("#linkSize").val();
+
+            let title = $("#title").val();
+            let site = $("#site").val();
+            let icon = $("#icon").val();
+            let siteDescription = $("#siteDescription").val();
+
+            let bottomDescription = $("#bottomDescription").val();
+            $.ajax({
+                type: 'post',
+                url: '/admin/properties/updateLinkProperties',
+                dataType: 'json',
+                contentType: "application/json;charset=UTF-8",
+                data: JSON.stringify({
+                    "header": header,
+                    "description": description,
+                    "linkSize": linkSize,
+
+                    "title": title,
+                    "site": site,
+                    "icon": icon,
+                    "siteDescription": siteDescription,
+
+                    "bottomDescription": bottomDescription,
+                }),
+                success: function (data) {
+                    if (data.code === 0) {
+                        layer.msg("添加成功")
+                    } else {
+                        layer.msg("修改成功")
+                    }
+                }
+            })
+        })
+    });
+</script>
+</html>

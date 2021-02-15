@@ -15,7 +15,6 @@ import top.chao58.blog.entity.vo.ReadArticleVo;
 import top.chao58.blog.facade.ArticleFacade;
 import top.chao58.blog.properties.ArticleProperties;
 import top.chao58.blog.properties.ShareProperties;
-import top.chao58.blog.properties.parse.PropertiesFactory;
 import top.chao58.blog.service.*;
 
 import java.util.*;
@@ -24,8 +23,11 @@ import java.util.*;
 @RequestMapping("/article")
 @SystemLog(module = "文章模块")
 public class ArticleController {
+
     @Autowired
-    private PropertiesFactory propertiesFactory;
+    private ArticleProperties articleProperties;
+    @Autowired
+    private ShareProperties shareProperties;
     @Autowired
     private NavigationService navigationService;
     @Autowired
@@ -44,7 +46,6 @@ public class ArticleController {
     @SystemLog(method = "分页查询文章列表")
     public Map<String, Object> list(Integer currentPage, Integer labelId, String searchTxt) {
         HashMap<String, Object> map = new HashMap<>();
-        ArticleProperties articleProperties = (ArticleProperties) propertiesFactory.getByClass(ArticleProperties.class);
         Integer size = Integer.valueOf(articleProperties.getShowSize());
         //首先查出总页数，总条数/每页数
         Integer pageTotal = (articleService.getTotalByCondition(labelId, searchTxt) / size) + 1;
@@ -55,7 +56,6 @@ public class ArticleController {
         return map;
     }
 
-
     @GetMapping("/read/{id}")
     @SystemLog(method = "点击文章内容")
     public String read(@PathVariable Integer id, Model model) {
@@ -65,8 +65,6 @@ public class ArticleController {
         statisticsService.incrData(new Statistics().setArticleFlow(1));
         ReadArticleVo readArticleVo = articleService.getArticleById(id);
         List<Navigation> navigations = navigationService.getAllTop();
-        ShareProperties shareProperties = (ShareProperties) propertiesFactory.getByClass(ShareProperties.class);
-        ArticleProperties articleProperties = (ArticleProperties) propertiesFactory.getByClass(ArticleProperties.class);
         //延伸阅读
         List<ArticleListVo> extendArticles = extendArticle(articleFacade.getArticleListByCondition(1, articleService.getTotal()), readArticleVo);
         //评论
@@ -92,7 +90,6 @@ public class ArticleController {
         articleService.addComment(articleId, userId, pid, content);
         //统计
         statisticsService.incrData(new Statistics().setArticleComment(1));
-        ArticleProperties articleProperties = (ArticleProperties) propertiesFactory.getByClass(ArticleProperties.class);
         String mailContent = "<pre>有人在<a href=\"" + articleProperties.getSite() + "/article/read/" + articleId + "\" target=\"_blank\">该文章</a>进行了评论</pre>";
         mailService.sendMail("2258354832@qq.com", "往事随风博客", "评论", mailContent);
         return 200;

@@ -11,7 +11,6 @@ import top.chao58.blog.dao.ImageDao;
 import top.chao58.blog.entity.po.Image;
 import top.chao58.blog.entity.vo.ResponseVo;
 import top.chao58.blog.properties.OssProperties;
-import top.chao58.blog.properties.parse.PropertiesFactory;
 import top.chao58.blog.util.PictureType;
 
 import javax.annotation.PostConstruct;
@@ -25,20 +24,16 @@ import java.util.List;
 public class OssService {
 
     @Autowired
-    private PropertiesFactory propertiesFactory;
-
-    @Autowired
     private ImageDao imageDao;
 
+    @Autowired
     private OssProperties ossProperties;
     private OSS oss;
 
     @PostConstruct
     public void init() {
-        ossProperties = (OssProperties) propertiesFactory.getByClass(OssProperties.class);
         oss = getOss();
     }
-
 
     public void deleteImages(ResponseVo<Integer> responseVo) {
         List<Image> images = imageDao.getAllImages();

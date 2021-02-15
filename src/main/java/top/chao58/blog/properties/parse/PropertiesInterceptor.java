@@ -14,6 +14,8 @@ import java.lang.reflect.Method;
 @Log
 public class PropertiesInterceptor implements MethodInterceptor {
 
+
+    @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
         String simpleName = o.getClass().getSuperclass().getSimpleName().replace("Properties", "").toLowerCase();
         PropertiesUtil propertiesUtil = new PropertiesUtil(simpleName);
@@ -33,10 +35,10 @@ public class PropertiesInterceptor implements MethodInterceptor {
         return methodProxy.invokeSuper(o, objects);
     }
 
-    public static Object createProxy(Class<?> clazz) {
-        log.info("创建代理对象：" + clazz);
+    public static Object createProxy(Object bean) {
+        log.info("创建代理对象：" + bean);
         Enhancer enhancer = new Enhancer();
-        enhancer.setSuperclass(clazz);
+        enhancer.setSuperclass(bean.getClass());
         enhancer.setCallback(new PropertiesInterceptor());
         return enhancer.create();
     }

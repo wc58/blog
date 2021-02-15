@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import top.chao58.blog.annotation.SystemLog;
 import top.chao58.blog.entity.vo.ResponseVo;
 import top.chao58.blog.properties.*;
-import top.chao58.blog.properties.parse.PropertiesFactory;
 import top.chao58.blog.service.MailService;
 
 @RestController
@@ -15,7 +14,35 @@ import top.chao58.blog.service.MailService;
 public class AdminPropertiesController {
 
     @Autowired
-    private PropertiesFactory propertiesFactory;
+    private OssProperties ossProperties;
+
+    @Autowired
+    private IndexProperties indexProperties;
+
+    @Autowired
+    private ShareProperties shareProperties;
+
+    @Autowired
+    private OtherProperties otherProperties;
+
+    @Autowired
+    private ArticleProperties articleProperties;
+
+    @Autowired
+    private LeaveProperties leaveProperties;
+
+    @Autowired
+    private LinkProperties linkProperties;
+
+    @Autowired
+    private DiaryProperties diaryProperties;
+
+    @Autowired
+    private AboutProperties aboutProperties;
+
+    @Autowired
+    private MailProperties mailProperties;
+
 
     @Autowired
     private MailService mailService;
@@ -23,7 +50,7 @@ public class AdminPropertiesController {
     @GetMapping("/getOssProperties")
     @SystemLog(method = "查询OSS设置")
     public OssProperties getOssProperties() {
-        return (OssProperties) propertiesFactory.getByClass(OssProperties.class);
+        return ossProperties;
     }
 
 
@@ -31,7 +58,7 @@ public class AdminPropertiesController {
     @SystemLog(method = "修改OSS设置")
     public ResponseVo<Object> updateOssProperties(@RequestBody OssProperties ossProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(ossProperties, propertiesFactory.getByClass(OssProperties.class));
+        BeanUtils.copyProperties(ossProperties, this.ossProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -40,7 +67,7 @@ public class AdminPropertiesController {
     @GetMapping("/getIndexProperties")
     @SystemLog(method = "查询首页设置")
     public IndexProperties getIndexProperties() {
-        return (IndexProperties) propertiesFactory.getByClass(IndexProperties.class);
+        return indexProperties;
     }
 
 
@@ -48,7 +75,7 @@ public class AdminPropertiesController {
     @SystemLog(method = "修改首页设置")
     public ResponseVo<Object> updateIndexProperties(@RequestBody IndexProperties indexProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(indexProperties, propertiesFactory.getByClass(IndexProperties.class));
+        BeanUtils.copyProperties(indexProperties, this.indexProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -56,7 +83,7 @@ public class AdminPropertiesController {
     @GetMapping("/getArticleProperties")
     @SystemLog(method = "查询文章页设置")
     public ArticleProperties getArticleProperties() {
-        return (ArticleProperties) propertiesFactory.getByClass(ArticleProperties.class);
+        return articleProperties;
     }
 
 
@@ -64,7 +91,7 @@ public class AdminPropertiesController {
     @SystemLog(method = "修改文章页设置")
     public ResponseVo<Object> updateArticleProperties(@RequestBody ArticleProperties articleProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(articleProperties, propertiesFactory.getByClass(ArticleProperties.class));
+        BeanUtils.copyProperties(articleProperties, this.articleProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -72,7 +99,7 @@ public class AdminPropertiesController {
     @GetMapping("/getLeaveProperties")
     @SystemLog(method = "查询留言页设置")
     public LeaveProperties getLeaveProperties() {
-        return (LeaveProperties) propertiesFactory.getByClass(LeaveProperties.class);
+        return leaveProperties;
     }
 
 
@@ -80,7 +107,7 @@ public class AdminPropertiesController {
     @SystemLog(method = "修改留言页设置")
     public ResponseVo<Object> updateLeaveProperties(@RequestBody LeaveProperties leaveProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(leaveProperties, propertiesFactory.getByClass(LeaveProperties.class));
+        BeanUtils.copyProperties(leaveProperties, this.leaveProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -88,7 +115,7 @@ public class AdminPropertiesController {
     @GetMapping("/getLinkProperties")
     @SystemLog(method = "查询友链页设置")
     public LinkProperties getLinkProperties() {
-        return (LinkProperties) propertiesFactory.getByClass(LinkProperties.class);
+        return linkProperties;
     }
 
 
@@ -96,7 +123,7 @@ public class AdminPropertiesController {
     @SystemLog(method = "修改友链页设置")
     public ResponseVo<Object> updateLinkProperties(@RequestBody LinkProperties linkProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(linkProperties, propertiesFactory.getByClass(LinkProperties.class));
+        BeanUtils.copyProperties(linkProperties, this.linkProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -104,14 +131,14 @@ public class AdminPropertiesController {
     @GetMapping("/getDiaryProperties")
     @SystemLog(method = "查询日记页设置")
     public DiaryProperties getDiaryProperties() {
-        return (DiaryProperties) propertiesFactory.getByClass(DiaryProperties.class);
+        return diaryProperties;
     }
 
     @PostMapping("/updateDiaryProperties")
     @SystemLog(method = "修改日记页设置")
     public ResponseVo<Object> updateDiaryProperties(@RequestBody DiaryProperties diaryProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(diaryProperties, propertiesFactory.getByClass(DiaryProperties.class));
+        BeanUtils.copyProperties(diaryProperties, this.diaryProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -120,14 +147,14 @@ public class AdminPropertiesController {
     @GetMapping("/getAboutProperties")
     @SystemLog(method = "查询关于页设置")
     public AboutProperties getAboutProperties() {
-        return (AboutProperties) propertiesFactory.getByClass(AboutProperties.class);
+        return aboutProperties;
     }
 
     @PostMapping("/updateAboutProperties")
     @SystemLog(method = "修改关于也设置")
     public ResponseVo<Object> updateAboutProperties(@RequestBody AboutProperties aboutProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(aboutProperties, propertiesFactory.getByClass(AboutProperties.class));
+        BeanUtils.copyProperties(aboutProperties, this.aboutProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -135,14 +162,14 @@ public class AdminPropertiesController {
     @GetMapping("/getMailProperties")
     @SystemLog(method = "查询邮箱设置")
     public MailProperties getMailProperties() {
-        return (MailProperties) propertiesFactory.getByClass(MailProperties.class);
+        return mailProperties;
     }
 
     @PostMapping("/updateMailProperties")
     @SystemLog(method = "修改邮箱设置")
     public ResponseVo<Object> updateMailProperties(@RequestBody MailProperties mailProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(mailProperties, propertiesFactory.getByClass(MailProperties.class));
+        BeanUtils.copyProperties(mailProperties, this.mailProperties);
         responseVo.setCode(0);
         return responseVo;
     }
@@ -150,14 +177,14 @@ public class AdminPropertiesController {
     @GetMapping("/getShareProperties")
     @SystemLog(method = "查询共享设置")
     public ShareProperties getShareProperties() {
-        return (ShareProperties) propertiesFactory.getByClass(ShareProperties.class);
+        return shareProperties;
     }
 
     @PostMapping("/updateShareProperties")
     @SystemLog(method = "修改共享设置")
     public ResponseVo<Object> updateShareProperties(@RequestBody ShareProperties shareProperties) {
         ResponseVo<Object> responseVo = new ResponseVo<>();
-        BeanUtils.copyProperties(shareProperties, propertiesFactory.getByClass(ShareProperties.class));
+        BeanUtils.copyProperties(shareProperties, this.shareProperties);
         responseVo.setCode(0);
         return responseVo;
     }

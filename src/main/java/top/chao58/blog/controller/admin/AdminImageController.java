@@ -1,6 +1,5 @@
 package top.chao58.blog.controller.admin;
 
-import com.qq.connect.utils.http.ImageItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,7 +8,6 @@ import top.chao58.blog.entity.po.Image;
 import top.chao58.blog.entity.vo.ResponseVo;
 import top.chao58.blog.entity.vo.template.ImageTemplate;
 import top.chao58.blog.properties.OssProperties;
-import top.chao58.blog.properties.parse.PropertiesFactory;
 import top.chao58.blog.service.ImageService;
 import top.chao58.blog.service.OssService;
 import top.chao58.blog.util.PictureType;
@@ -23,7 +21,7 @@ import java.util.*;
 public class AdminImageController {
 
     @Autowired
-    private PropertiesFactory propertiesFactory;
+    private OssProperties ossProperties;
 
     @Autowired
     private OssService ossService;
@@ -36,7 +34,6 @@ public class AdminImageController {
     public HashMap<String, Object> getPictureList(Integer currentPage, String type) {
         List<Image> images = imageService.getPictureList(currentPage, type);
         Integer pages = (imageService.getTotal(type) / 10) + 1;
-        OssProperties ossProperties = (OssProperties) propertiesFactory.getByClass(OssProperties.class);
         HashMap<String, Object> map = new HashMap<>();
         map.put("pages", pages);
         map.put("images", renderTemplate(images, ossProperties.getOssSite()));

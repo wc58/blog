@@ -2,9 +2,7 @@ package top.chao58.blog.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import top.chao58.blog.entity.vo.ResponseVo;
 import top.chao58.blog.properties.MailProperties;
-import top.chao58.blog.properties.parse.PropertiesFactory;
 
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -16,12 +14,12 @@ import java.util.Properties;
 @Service
 public class MailService {
 
+
     @Autowired
-    private PropertiesFactory propertiesFactory;
+    private MailProperties mailProperties;
 
     public boolean sendMail(String receiveMailAccount, String title, String subject, String content) {
         //获取发送者信息
-        MailProperties mailProperties = (MailProperties) propertiesFactory.getByClass(MailProperties.class);
         String sendEmailAccount = mailProperties.getSendEmailAccount();
         String sendEmailPassword = mailProperties.getSendEmailPassword();
         String sendEmailSMTPHost = mailProperties.getSendEmailSMTPHost();

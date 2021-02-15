@@ -9,7 +9,6 @@ import top.chao58.blog.annotation.SystemLog;
 import top.chao58.blog.entity.po.Navigation;
 import top.chao58.blog.entity.vo.*;
 import top.chao58.blog.properties.*;
-import top.chao58.blog.properties.parse.PropertiesFactory;
 import top.chao58.blog.service.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,8 +19,30 @@ import java.util.List;
 @Log
 @SystemLog(module = "页面跳转模块")
 public class PageController {
+
     @Autowired
-    private PropertiesFactory propertiesFactory;
+    private ShareProperties shareProperties;
+
+    @Autowired
+    private IndexProperties indexProperties;
+
+    @Autowired
+    private OtherProperties otherProperties;
+
+    @Autowired
+    private ArticleProperties articleProperties;
+
+    @Autowired
+    private LeaveProperties leaveProperties;
+
+    @Autowired
+    private LinkProperties linkProperties;
+
+    @Autowired
+    private DiaryProperties diaryProperties;
+
+    @Autowired
+    private AboutProperties aboutProperties;
 
     @Autowired
     private NavigationService navigationService;
@@ -54,8 +75,6 @@ public class PageController {
         List<HotArticleVo> hotArticleList = articleService.getHotArticle(decideClient(request));
         //文本信息
         log.info("准备查询文本信息");
-        IndexProperties indexProperties = (IndexProperties) propertiesFactory.getByClass(IndexProperties.class);
-        ShareProperties shareProperties = (ShareProperties) propertiesFactory.getByClass(ShareProperties.class);
         //导航信息
         log.info("准备查询导航信息");
         List<Navigation> navigationLefts = navigationService.getAllLeft();
@@ -81,8 +100,6 @@ public class PageController {
     @SystemLog(method = "跳转文章列表")
     @GetMapping("/article")
     public String toArticle(Model model) {
-        ArticleProperties articleProperties = (ArticleProperties) propertiesFactory.getByClass(ArticleProperties.class);
-        OtherProperties otherProperties = (OtherProperties) propertiesFactory.getByClass(OtherProperties.class);
         //标签
         List<LabelVo> labels = labelService.getAllLabels();
         //热门文章
@@ -102,7 +119,6 @@ public class PageController {
     @SystemLog(method = "跳转留言页面")
     @GetMapping("/leave")
     public String toLeave(Model model) {
-        LeaveProperties leaveProperties = (LeaveProperties) propertiesFactory.getByClass(LeaveProperties.class);
         List<LeaveVo> leaves = leaveService.getLeave();
         model.addAttribute("leaveProperties", leaveProperties);
         model.addAttribute("leaves", leaves);
@@ -113,7 +129,6 @@ public class PageController {
     @SystemLog(method = "跳转友链页面")
     @GetMapping("/link")
     public String toLink(Model model) {
-        LinkProperties linkProperties = (LinkProperties) propertiesFactory.getByClass(LinkProperties.class);
         List<LinkVo> linkVos = linkService.getLinks();
         model.addAttribute("linkProperties", linkProperties);
         model.addAttribute("linkVos", linkVos);
@@ -124,7 +139,6 @@ public class PageController {
     @SystemLog(method = "跳转日记页面")
     @GetMapping("/diary")
     public String toDiary(Model model) {
-        DiaryProperties diaryProperties = (DiaryProperties) propertiesFactory.getByClass(DiaryProperties.class);
         HashMap<String, List<DiaryVo>> diaryVos = diaryService.getDiaries(diaryProperties.getStartTime(), diaryProperties.getEndTime());
         setCommonModel(model);
         model.addAttribute("diaryVos", diaryVos);
@@ -134,7 +148,6 @@ public class PageController {
     @SystemLog(method = "跳转关于页面")
     @GetMapping("/about")
     public String toAbout(Model model) {
-        AboutProperties aboutProperties = (AboutProperties) propertiesFactory.getByClass(AboutProperties.class);
         setCommonModel(model);
         model.addAttribute("aboutProperties", aboutProperties);
         return "about";
@@ -145,7 +158,6 @@ public class PageController {
      */
     private void setCommonModel(Model model) {
         List<Navigation> navigations = navigationService.getAllTop();
-        ShareProperties shareProperties = (ShareProperties) propertiesFactory.getByClass(ShareProperties.class);
         model.addAttribute("shareProperties", shareProperties);
         model.addAttribute("navigations", navigations);
     }

@@ -10,12 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import top.chao58.blog.entity.po.Statistics;
 import top.chao58.blog.properties.OtherProperties;
-import top.chao58.blog.properties.parse.PropertiesFactory;
 import top.chao58.blog.service.*;
 
 import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -26,7 +23,8 @@ import java.util.Properties;
 @RequestMapping("/admin")
 public class AdminPageController {
 
-
+    @Autowired
+    private OtherProperties otherProperties;
     @Autowired
     private ArticleService articleService;
     @Autowired
@@ -44,8 +42,6 @@ public class AdminPageController {
     @Autowired
     private AdminService adminService;
     @Autowired
-    private PropertiesFactory propertiesFactory;
-    @Autowired
     private StatisticsService statisticsService;
 
 
@@ -56,7 +52,6 @@ public class AdminPageController {
 
     @GetMapping("/desk")
     public String desk(Model model, HttpSession session) {
-        OtherProperties otherProperties = (OtherProperties) propertiesFactory.getByClass(OtherProperties.class);
         //========数据统计  1==============================
         packageDataOne(model, otherProperties);
         //========数据统计  2==============================
